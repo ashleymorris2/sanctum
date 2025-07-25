@@ -1,0 +1,20 @@
+{
+  "name": "Sanctum - Personal Metrics Logger",
+  "dockerComposeFile": "./compose.yml",
+  "service": "dev",
+  "workspaceFolder": "/workspace",
+  "forwardPorts": [
+    3000
+  ],
+  "customizations": {
+    "jetbrains": {
+      "plugins": [
+        "lechuck.intellij-plugin.task",
+        "com.intellij.ml.llm",
+        "ru.adelf.idea.dotenv"
+      ]
+    }
+  },
+  //  "postCreateCommand": "sh -c \"$(curl --silent --show-error --location https://taskfile.dev/install.sh)\" -- -d -b /usr/local/bin"
+//  "postAttachCommand": ".devcontainer/scripts/post-create.sh "
+}
