@@ -1,0 +1,46 @@
+version: '3'
+
+vars:
+  METRICS_CONTAINER: metrics
+  WEB_CONTAINER: web
+
+tasks:
+  up:
+    desc: Start all services
+    cmds:
+      - docker-compose up -d
+
+  down:
+    desc: Stop all services
+    cmds:
+      - docker-compose down
+
+  backend:shell:
+    desc: Open a shell in the backend container
+    cmds:
+      - docker exec -it {{.METRICS_CONTAINER}} sh
+
+  frontend:shell:
+    desc: Open a shell in the frontend container
+    cmds:
+      - docker exec -it {{.WEB_CONTAINER}} sh
+
+  frontend:init:
+    desc: Initialize SvelteKit in the frontend container
+    cmds:
+      - task frontend:shell --command "pnpm create svelte@latest ."
+
+  frontend:dev:
+    desc: Start frontend dev server inside container
+    cmds:
+      - docker exec -it {{.WEB_CONTAINER}} pnpm dev --host
+
+  backend:logs:
+    desc: Tail backend logs
+    cmds:
+      - docker-compose logs -f metrics
+
+  frontend:logs:
+    desc: Tail frontend logs
+    cmds:
+      - docker-compose logs -f web

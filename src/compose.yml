@@ -1,0 +1,53 @@
+services:
+  web:
+    build: ./web
+    volumes:
+      - ./web:/app
+      - ./web/node_modules:/app/node_modules
+    ports:
+      - "5173:5173"
+    networks:
+      - sanctum_internal
+    command: sh -c "pnpm install && pnpm dev --host"
+
+  metrics:
+    build: ./backend/metrics
+    volumes:
+      - ./backend/metrics:/app
+    ports:
+      - "8080:8080"
+    networks:
+      - sanctum_internal
+    environment:
+      - PORT=8080
+
+  pocketbase:
+    build: ./backend/pocketbase
+    ports:
+      - "9000:8090"
+    volumes:
+      - pocketbase_data:/pb_data
+    networks:
+      - sanctum_internal
+
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: dev
+      POSTGRES_PASSWORD: dev
+      POSTGRES_DB: metrics
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5430:5432"
+    networks:
+      - sanctum_internal
+
+networks:
+  sanctum_internal:
+
+volumes:
+#  web_data:
+  postgres_data:
+  pocketbase_data:
