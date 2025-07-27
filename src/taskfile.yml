@@ -2,7 +2,7 @@ version: '3'
 
 vars:
   METRICS_CONTAINER: metrics
-  WEB_CONTAINER: web
+  WEB_CONTAINER: sanctum-web-1
 
 tasks:
   up:
@@ -15,6 +15,11 @@ tasks:
     cmds:
       - docker-compose down
 
+  storybook:
+    desc: Run Storybook in frontend container
+    cmds:
+      - docker compose exec web pnpm storybook dev -p 6006 --no-open
+
   backend:shell:
     desc: Open a shell in the backend container
     cmds:
@@ -23,7 +28,7 @@ tasks:
   frontend:shell:
     desc: Open a shell in the frontend container
     cmds:
-      - docker exec -it {{.WEB_CONTAINER}} sh
+      - docker exec -i {{.WEB_CONTAINER}} sh
 
   frontend:init:
     desc: Initialize SvelteKit in the frontend container
