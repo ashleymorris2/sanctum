@@ -1,0 +1,45 @@
+version: '3'
+
+vars:
+  WEB_CONTAINER: sanctum-web-1
+
+tasks:
+  up:
+    desc: Start all services
+    cmds:
+      - docker-compose up -d
+
+  down:
+    desc: Stop all services
+    cmds:
+      - docker-compose down
+
+  storybook:
+    desc: Run Storybook in frontend container
+    cmds:
+      - docker compose exec web pnpm storybook dev -p 6006 --no-open
+
+  frontend:shell:
+    desc: Open a shell in the frontend container
+    cmds:
+      - docker exec -i {{.WEB_CONTAINER}} sh
+
+  frontend:init:
+    desc: Initialize SvelteKit in the frontend container
+    cmds:
+      - task frontend:shell --command "pnpm create svelte@latest ."
+
+  frontend:dev:
+    desc: Start frontend dev server inside container
+    cmds:
+      - docker exec -it {{.WEB_CONTAINER}} pnpm dev --host
+
+  backend:logs:
+    desc: Tail backend logs
+    cmds:
+      - docker-compose logs -f metrics
+
+  frontend:logs:
+    desc: Tail frontend logs
+    cmds:
+      - docker-compose logs -f web

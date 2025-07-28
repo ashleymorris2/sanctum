@@ -1,3 +1,9 @@
 @import 'tailwindcss';
-@plugin '@tailwindcss/forms';
-@plugin '@tailwindcss/typography';
+@import "./styles/sanctum.css";
+
+@tailwind utilities;
+
+@plugin "daisyui" {
+    themes: light --default, dark --prefersdark, emerald, sanctum;
+}
+
