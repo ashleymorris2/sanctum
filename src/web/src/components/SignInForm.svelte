@@ -1,7 +1,5 @@
 <script lang="ts">
     import { enhance } from '$app/forms';
-    export let email = '';
-    export let password = '';
 </script>
 
 <div class="w-full max-w-md">
@@ -17,7 +15,7 @@
         </label>
         <input
                 type="email"
-                bind:value={email}
+                name="email"
                 placeholder="you@example.com"
                 class="input-bordered input mb-4 w-full"
                 required
@@ -28,7 +26,7 @@
         </label>
         <input
                 type="password"
-                bind:value={password}
+                name="password"
                 placeholder="••••••"
                 class="input-bordered input mb-6 w-full"
                 required

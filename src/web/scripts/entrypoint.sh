@@ -7,9 +7,11 @@ if [ ! -f "/app/svelte.config.js" ]; then
 
    tail -f /dev/null
 else
-  echo "Svelte project found. Checking for new dependencies..."
+  echo "Svelte project found. Running debug..."
   # Just ensure dependencies are installed
-  pnpm install
+
+#  NODE_OPTIONS="--inspect=0.0.0.0:9000" npm run debug
+   npm run debug
 fi
 
 # Executeç the passed command (CMD)

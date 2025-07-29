@@ -7,12 +7,11 @@ services:
     ports:
       - "5173:5173"
       - "6006:6006"
-      - "9000:9000"
+      - "9229:9229"  # Debugger
     networks:
       - sanctum_internal
-    command: >
-      sh -c "pnpm install &&
-             NODE_OPTIONS='--inspect=0.0.0.0:9000' pnpm run dev --host"
+    # command: >
+    #   pnpm run debug
 
   metrics:
     build: ./backend/metrics
