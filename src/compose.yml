@@ -7,9 +7,12 @@ services:
     ports:
       - "5173:5173"
       - "6006:6006"
+      - "9000:9000"
     networks:
       - sanctum_internal
-    command: sh -c "pnpm install && pnpm dev --host"
+    command: >
+      sh -c "pnpm install &&
+             NODE_OPTIONS='--inspect=0.0.0.0:9000' pnpm run dev --host"
 
   metrics:
     build: ./backend/metrics
@@ -25,7 +28,7 @@ services:
   pocketbase:
     build: ./backend/pocketbase
     ports:
-      - "9000:8090"
+      - "8090:8090"
     volumes:
       - pocketbase_data:/pb_data
     networks:

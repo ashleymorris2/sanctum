@@ -1,16 +1,15 @@
-<!-- src/stories/LoginForm.stories.svelte -->
 <script module lang="ts">
     import { defineMeta } from '@storybook/addon-svelte-csf';
-    import LoginForm from '../components/LoginForm.svelte';
+    import SignInForm from '../components/SignInForm.svelte';
 
     const { Story } = defineMeta({
-        title: 'Auth/LoginForm',
-        component: LoginForm
+        title: 'Auth/SignInForm',
+        component: SignInForm
     });
 </script>
 
 <Story name="Default" let:args>
-    <LoginForm
+    <SignInForm
             email={args.email}
             password={args.password}
             onSubmit={args.onSubmit}

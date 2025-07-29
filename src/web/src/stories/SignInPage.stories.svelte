@@ -1,10 +1,10 @@
 <script module>
     import { defineMeta } from '@storybook/addon-svelte-csf';
-    import LoginPage from '../routes/login/+page.svelte';
+    import SignInPage from '../routes/sign-in/+page.svelte';
 
     const { Story } = defineMeta({
-        title: 'Pages/Login',
-        component: LoginPage,
+        title: 'Pages/sign-in',
+        component: SignInPage,
         parameters: {
             layout: 'fullscreen',
         },
@@ -13,7 +13,7 @@
 
 <Story name="Default" args={{}}>
     {#snippet children(args)}
-        <LoginPage {...args} />
+        <SignInPage {...args} />
     {/snippet}
 </Story>
 
