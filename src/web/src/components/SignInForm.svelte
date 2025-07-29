@@ -4,7 +4,7 @@
 
 <div class="w-full max-w-md">
     <div class="mb-8 text-center">
-        <h1 class="text-4xl font-bold">Sign in</h1>
+        <h1 class="text-4xl font-bold mb-8">Sign in</h1>
         <p class="text-base-content/60">Welcome back! Please enter your credentials.</p>
     </div>
 
