@@ -36,20 +36,19 @@ export const actions: Actions = {
 
 			const { token } = await res.json();
 
-			// Handle session (set cookie, etc.) here
-			cookies.set('pb_auth', token, {
+			cookies.set('auth', token, {
 				path: '/',
 				httpOnly: true,
 				sameSite: 'lax',
 				secure: process.env.NODE_ENV === 'production',
 				maxAge: 60 * 60 * 24 * 7 // 7 days
 			});
-
-			// Redirect to dashboard
-			return redirect(302, '/dashboard');
 		} catch (err) {
 			console.error('Login error:', err);
 			return fail(500, { error: 'Server error during login' });
 		}
+
+		// Redirect to dashboard
+		return redirect(302, '/dashboard');
 	}
 };

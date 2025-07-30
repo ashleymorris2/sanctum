@@ -8,7 +8,7 @@
         <p class="text-base-content/60">Welcome back! Please enter your credentials.</p>
     </div>
 
-    <form method="POST" use:enhance action="/sign-in" class="card mx-auto mt-12 card-body max-w-sm">
+    <form method="POST" use:enhance action="/login" class="card mx-auto mt-12 card-body max-w-sm">
 
         <label class="label" for="email">
             <span class="label-text">Email</span>
