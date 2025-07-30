@@ -1,0 +1,35 @@
+version: '3'
+
+dotenv: ['.env']
+
+vars:
+  DB_DRIVER: postgres
+  DB_CONNECTION_STRING: "{{ .AUTH_DATABASE_URL }}"
+  MIGRATIONS_DIR: "./internal/db/migrations"
+  SQLC_CONFIG: "./internal/db/sqlc.yml"
+
+tasks:
+  migrate:create:
+    desc: Create a new migration file
+    interactive: true
+    silent: true
+    cmds:
+      - |
+        echo -n "Enter migration name: "
+        read name
+        goose -dir {{.MIGRATIONS_DIR}} create "$name" sql
+
+  migrate:up:docker:
+    desc: Apply all available migrations
+    cmds:
+      - docker exec sanctum-metrics-1 goose -dir {{.MIGRATIONS_DIR}} {{.DB_DRIVER}} "{{.DB_CONNECTION_STRING}}" up
+
+  migrate:down:docker:
+    desc: Rollback the last applied migration
+    cmds:
+      - docker exec sanctum-metrics-1 goose -dir {{.MIGRATIONS_DIR}} {{.DB_DRIVER}} "{{.DB_CONNECTION_STRING}}" down
+
+  sqlc:generate:
+    desc: Generate Go code from SQL
+    cmds:
+      - sqlc generate -f {{.SQLC_CONFIG}}

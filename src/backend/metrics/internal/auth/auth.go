@@ -1,7 +1,10 @@
 package auth
 
+import "context"
+
 type Provider interface {
-	Authenticate(email, password string) (*Result, error)
+	Register(ctx context.Context, email, password string) (*Result, error)
+	Authenticate(ctx context.Context, email, password string) (*Result, error)
 }
 
 type Request struct {
