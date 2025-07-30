@@ -1,11 +1,11 @@
 <script lang="ts">
-    import SignInForm from '../../components/SignInForm.svelte';
+    import LoginForm from '../../components/LoginForm.svelte';
 </script>
 
 <div class="min-h-screen bg-base-100 flex ">
 
     <div class="lg:w-1/2 flex flex-col items-center justify-center p-6">
-        <SignInForm/>
+        <LoginForm/>
     </div>
 
     <!-- Left panel: only visible on medium and up -->

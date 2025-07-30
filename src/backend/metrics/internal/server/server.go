@@ -11,8 +11,8 @@ func New() *echo.Echo {
 	e.Validator = validators.NewRequestValidator()
 
 	api := e.Group("/api")
-	routes.RegisterAuth(api)
-	routes.RegisterMetrics(api)
+	routes.RegisterAuthFor(api)
+	routes.RegisterMetricsFor(api)
 
 	return e
 }

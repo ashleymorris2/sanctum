@@ -3,7 +3,7 @@ import { fail, redirect } from '@sveltejs/kit';
 import { AUTH_API_BASE } from '$env/static/private';
 
 export const actions: Actions = {
-	default: async ({ request }) => {
+	default: async ({ request, cookies }) => {
 		const formData = await request.formData();
 		const email = formData.get('email')?.toString().trim();
 		const password = formData.get('password')?.toString();
@@ -23,7 +23,7 @@ export const actions: Actions = {
 		}
 
 		try {
-			const res = await fetch(`${AUTH_API_BASE}/api/sign-in`, {
+			const res = await fetch(`${AUTH_API_BASE}/api/login`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ email, password })
@@ -34,7 +34,16 @@ export const actions: Actions = {
 				return fail(res.status, { error: err.message || 'Login failed' });
 			}
 
+			const { token } = await res.json();
+
 			// Handle session (set cookie, etc.) here
+			cookies.set('pb_auth', token, {
+				path: '/',
+				httpOnly: true,
+				sameSite: 'lax',
+				secure: process.env.NODE_ENV === 'production',
+				maxAge: 60 * 60 * 24 * 7 // 7 days
+			});
 
 			// Redirect to dashboard
 			return redirect(302, '/dashboard');

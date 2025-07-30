@@ -1,9 +1,9 @@
 <script module>
     import { defineMeta } from '@storybook/addon-svelte-csf';
-    import SignInPage from '../routes/sign-in/+page.svelte';
+    import SignInPage from '../routes/login/+page.svelte';
 
     const { Story } = defineMeta({
-        title: 'Pages/sign-in',
+        title: 'Pages/login',
         component: SignInPage,
         parameters: {
             layout: 'fullscreen',

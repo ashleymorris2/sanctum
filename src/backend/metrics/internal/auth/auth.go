@@ -1,7 +1,7 @@
 package auth
 
 type Provider interface {
-	Authenticate(email, password string) (Result, error)
+	Authenticate(email, password string) (*Result, error)
 }
 
 type Request struct {

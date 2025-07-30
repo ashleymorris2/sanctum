@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-var authService auth.Provider = auth.NewPocketBaseAuth()
+var authService auth.Provider = auth.NewPocketBaseAuth("http://pocketbase:8090")
 
 func Login(c echo.Context) error {
 	var request auth.Request

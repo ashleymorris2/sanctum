@@ -5,6 +5,6 @@ import (
 	"metrics/internal/handlers"
 )
 
-func RegisterAuth(g *echo.Group) {
+func RegisterAuthFor(g *echo.Group) {
 	g.POST("/login", handlers.Login)
 }
