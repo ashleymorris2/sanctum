@@ -15,6 +15,7 @@ import (
 var (
 	ErrAuthFailure     = errors.New("invalid credentials")
 	ErrDatabaseFailure = errors.New("database error during authentication")
+	ErrTokenGeneration = errors.New("failed to generate authentication token")
 )
 
 // CredentialService handles user authentication and registration using basic email-password credentials.
@@ -55,11 +56,9 @@ func ByCredentials(queries *sqlc.Queries, jwtSecret []byte, opts ...Option) *Cre
 		jwtSecret:    jwtSecret,
 		tokenTimeout: 15 * time.Minute,
 	}
-
 	for _, opt := range opts {
 		opt(p)
 	}
-
 	return p
 }
 
@@ -107,7 +106,7 @@ func (p *CredentialService) Authenticate(ctx context.Context, email, password st
 
 	token, err := p.generateJWT(user.ID)
 	if err != nil {
-		return nil, err
+		return nil, ErrTokenGeneration
 	}
 
 	return &Result{UserID: user.ID.String(), Email: user.Email, Token: token}, nil
