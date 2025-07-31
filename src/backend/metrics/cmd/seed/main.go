@@ -31,18 +31,18 @@ func main() {
 		log.Fatal("JWT_SECRET not set")
 	}
 
-	provider := auth.NewBasicAuthProvider(queries, []byte(jwtSecret))
+	credentials := auth.ByCredentials(queries, []byte(jwtSecret))
 
 	ctx := context.Background()
 	// Check if user exists
-	_, err = provider.Authenticate(ctx, "user@test.com", "password")
+	_, err = credentials.Authenticate(ctx, "user@test.com", "password")
 	if err == nil {
 		fmt.Println("Seed user already exists.")
 		return
 	}
 
 	// Create user
-	res, err := provider.Register(ctx, "user@test.com", "password")
+	res, err := credentials.Register(ctx, "user@test.com", "password")
 	if err != nil {
 		log.Fatalf("Failed to seed user: %v", err)
 	}

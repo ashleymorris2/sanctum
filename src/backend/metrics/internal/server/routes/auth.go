@@ -9,6 +9,6 @@ import (
 )
 
 func RegisterAuthFor(g *echo.Group, queries *sqlc.Queries) {
-	handler := handlers.NewAuth(auth.NewBasicAuthProvider(queries, []byte(os.Getenv("JWT_SECRET"))))
+	handler := handlers.NewAuth(auth.ByCredentials(queries, []byte(os.Getenv("JWT_SECRET"))))
 	g.POST("/login", handler.Login)
 }

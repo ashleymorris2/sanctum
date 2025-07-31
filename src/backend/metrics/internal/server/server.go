@@ -1,14 +1,16 @@
 package server
 
 import (
+	"context"
 	"database/sql"
 	"github.com/labstack/echo/v4"
 	_ "github.com/lib/pq"
 	"log"
+	"metrics/internal/db"
 	"metrics/internal/db/sqlc"
 	"metrics/internal/server/routes"
 	"metrics/internal/validators"
-	"os"
+	"time"
 )
 
 type Server struct {
@@ -20,8 +22,10 @@ func New() *Server {
 	e := echo.New()
 	e.Validator = validators.NewRequestValidator()
 
-	dbURL := os.Getenv("AUTH_DATABASE_URL")
-	conn, err := sql.Open("postgres", dbURL)
+	dbCtx, dbCancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer dbCancel()
+
+	conn, err := db.ConnectToPostgres(dbCtx, db.DefaultPostgresConfig())
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -39,5 +43,8 @@ func New() *Server {
 }
 
 func (s *Server) Shutdown() {
-	s.DB.Close()
+	err := s.DB.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
 }
