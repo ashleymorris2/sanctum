@@ -10,19 +10,19 @@ import (
 	"time"
 )
 
-type LocalAuthProvider struct {
+type BasicAuthProvider struct {
 	queries   *sqlc.Queries
 	jwtSecret []byte
 }
 
-func NewLocalAuthProvider(queries *sqlc.Queries, jwtSecret []byte) *LocalAuthProvider {
-	return &LocalAuthProvider{
+func NewBasicAuthProvider(queries *sqlc.Queries, jwtSecret []byte) *BasicAuthProvider {
+	return &BasicAuthProvider{
 		queries:   queries,
 		jwtSecret: jwtSecret,
 	}
 }
 
-func (p *LocalAuthProvider) Register(ctx context.Context, email, password string) (*Result, error) {
+func (p *BasicAuthProvider) Register(ctx context.Context, email, password string) (*Result, error) {
 	hash, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 
 	user, err := p.queries.CreateUser(ctx, sqlc.CreateUserParams{
@@ -42,7 +42,7 @@ func (p *LocalAuthProvider) Register(ctx context.Context, email, password string
 	return &Result{UserID: user.ID.String(), Email: user.Email, Token: token}, nil
 }
 
-func (p *LocalAuthProvider) Authenticate(ctx context.Context, email, password string) (*Result, error) {
+func (p *BasicAuthProvider) Authenticate(ctx context.Context, email, password string) (*Result, error) {
 	user, err := p.queries.GetUserByEmail(ctx, email)
 	if err != nil {
 		return nil, errors.New("invalid email or password")
@@ -60,7 +60,7 @@ func (p *LocalAuthProvider) Authenticate(ctx context.Context, email, password st
 	return &Result{UserID: user.ID.String(), Email: user.Email, Token: token}, nil
 }
 
-func (p *LocalAuthProvider) generateJWT(userID uuid.UUID) (string, error) {
+func (p *BasicAuthProvider) generateJWT(userID uuid.UUID) (string, error) {
 	claims := jwt.MapClaims{
 		"id":  userID.String(),
 		"exp": time.Now().Add(15 * time.Minute).Unix(),
