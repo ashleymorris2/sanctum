@@ -10,6 +10,7 @@ RUN go install github.com/bokwoon95/wgo@latest
 RUN go install github.com/go-delve/delve/cmd/dlv@latest
 RUN go install github.com/pressly/goose/v3/cmd/goose@latest
 
+RUN apt-get update && apt-get install -y netcat-openbsd
 # Copy go mod file
 COPY go.mod ./
 # Download dependencies

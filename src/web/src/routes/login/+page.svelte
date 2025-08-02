@@ -1,11 +1,14 @@
 <script lang="ts">
     import LoginForm from '../../components/LoginForm.svelte';
+    import type { ActionData } from './$types';
+
+    export let form: ActionData;
 </script>
 
 <div class="min-h-screen bg-base-100 flex ">
 
     <div class="lg:w-1/2 flex flex-col items-center justify-center p-6">
-        <LoginForm/>
+        <LoginForm {form}/>
     </div>
 
     <!-- Left panel: only visible on medium and up -->

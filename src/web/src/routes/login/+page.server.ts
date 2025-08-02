@@ -30,8 +30,10 @@ export const actions: Actions = {
 			});
 
 			if (!res.ok) {
-				const err = await res.json();
-				return fail(res.status, { error: err.message || 'Login failed' });
+				const errorData = await res.json();
+
+				const errorMessage = Array.isArray(errorData) ? errorData[1] : errorData.message;
+				return fail(res.status, { errorMessage });
 			}
 
 			const { token } = await res.json();

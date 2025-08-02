@@ -9,7 +9,7 @@ import (
 func main() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Printf("Warning: Error loading .env file: %v", err)
+		log.Printf("Warning: Message loading .env file: %v", err)
 	}
 
 	s := server.New()

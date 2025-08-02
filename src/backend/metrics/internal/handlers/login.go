@@ -7,6 +7,11 @@ import (
 	"net/http"
 )
 
+type RequestDTO struct {
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required,min=6,max=128"`
+}
+
 type Auth struct {
 	authProvider auth.Provider
 }
@@ -18,22 +23,26 @@ func NewAuth(authProvider auth.Provider) *Auth {
 func (a *Auth) Login(c echo.Context) error {
 	ctx := c.Request().Context()
 
-	var request auth.Request
-	if err := c.Bind(&request); err != nil || c.Validate(&request) != nil {
+	var req RequestDTO
+	if err := c.Bind(&req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, ErrorResponse{Message: "Invalid request"})
+	}
+	if err := c.Validate(&req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, ErrorResponse{
-			Error: "Invalid request",
+			Message: "Validation failed",
+			// optionally include: "Details": err.Error(),
 		})
 	}
 
-	authResult, err := a.authProvider.Authenticate(ctx, request.Email, request.Password)
+	authResult, err := a.authProvider.Authenticate(ctx, req.Email, req.Password)
 	if err != nil {
 		if errors.Is(err, auth.ErrAuthFailure) {
 			return echo.NewHTTPError(http.StatusUnauthorized, ErrorResponse{
-				Error: "Invalid credentials",
+				Message: "Invalid credentials",
 			})
 		} else {
 			return echo.NewHTTPError(http.StatusInternalServerError, ErrorResponse{
-				Error: "Internal server error",
+				Message: "Internal server error",
 			})
 		}
 	}
