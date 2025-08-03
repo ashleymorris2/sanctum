@@ -7,19 +7,15 @@ export const actions: Actions = {
 		const formData = await request.formData();
 		const email = formData.get('email')?.toString().trim();
 		const password = formData.get('password')?.toString();
-		const formErrors: { [key: string]: string } = {};
 
-		// Validate presence
+		if (!email && !password) {
+			return fail(400, { globalError: 'Email and Password is required' });
+		}
 		if (!email) {
-			formErrors.email = 'Email is required';
+			return fail(400, { email: 'Email is required' });
 		}
-
 		if (!password) {
-			formErrors.password = 'Password is required';
-		}
-
-		if (Object.keys(formErrors).length > 0) {
-			return fail(400, { formErrors });
+			return fail(400, { email: 'Password is required' });
 		}
 
 		try {
@@ -31,9 +27,7 @@ export const actions: Actions = {
 
 			if (!res.ok) {
 				const errorData = await res.json();
-
-				const errorMessage = Array.isArray(errorData) ? errorData[1] : errorData.message;
-				return fail(res.status, { errorMessage });
+				return fail(res.status, errorData);
 			}
 
 			const { token } = await res.json();

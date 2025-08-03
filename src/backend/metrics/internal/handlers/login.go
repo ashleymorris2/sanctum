@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/labstack/echo/v4"
 	"metrics/internal/auth"
+	"metrics/internal/validators"
 	"net/http"
 )
 
@@ -27,11 +28,9 @@ func (a *Auth) Login(c echo.Context) error {
 	if err := c.Bind(&req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, ErrorResponse{Message: "Invalid request"})
 	}
+	
 	if err := c.Validate(&req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, ErrorResponse{
-			Message: "Validation failed",
-			// optionally include: "Details": err.Error(),
-		})
+		return c.JSON(http.StatusBadRequest, validators.FormatErrors(err))
 	}
 
 	authResult, err := a.authProvider.Authenticate(ctx, req.Email, req.Password)
