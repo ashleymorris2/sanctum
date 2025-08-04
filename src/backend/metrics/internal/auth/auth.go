@@ -18,9 +18,9 @@ type Result struct {
 }
 
 type MiddlewareConfig struct {
-	authProvider Provider
+	AuthProvider Provider
 }
 
 func NewMiddlewareConfig(authProvider Provider) MiddlewareConfig {
-	return MiddlewareConfig{authProvider: authProvider}
+	return MiddlewareConfig{AuthProvider: authProvider}
 }

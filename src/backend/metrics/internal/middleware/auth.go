@@ -8,11 +8,7 @@ import (
 	"strings"
 )
 
-func NewAuthConfig(authProvider auth.Provider) AuthConfig {
-	return AuthConfig{authProvider: authProvider}
-}
-
-func AuthMiddleware(config AuthConfig) echo.MiddlewareFunc {
+func AuthMiddleware(config auth.MiddlewareConfig) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			// 1. Extract access token from the Authorization header
@@ -30,8 +26,9 @@ func AuthMiddleware(config AuthConfig) echo.MiddlewareFunc {
 			// 2. If access token is not valid, check refresh token (cookie example)
 			refreshCookie, err := c.Cookie("refresh_token")
 			if err == nil {
-				if userID, ok := refreshAccessToken(refreshCookie.Value, config); ok {
+				if userID, jwtToken, ok := refreshAccessToken(refreshCookie.Value, config); ok {
 					c.Set("userID", userID)
+					issueNewTokensHeaders(c, jwtToken.String(), refreshCookie.Value)
 					return next(c)
 				}
 			}
@@ -42,8 +39,8 @@ func AuthMiddleware(config AuthConfig) echo.MiddlewareFunc {
 	}
 }
 
-func validateAccessToken(token string, config AuthConfig) (userID string, valid bool) {
-	credentialAuth, ok := config.authProvider.(*auth.CredentialService)
+func validateAccessToken(token string, config auth.MiddlewareConfig) (userID string, valid bool) {
+	credentialAuth, ok := config.AuthProvider.(*auth.CredentialService)
 	if !ok {
 		return "", false
 	}
@@ -59,30 +56,31 @@ func validateAccessToken(token string, config AuthConfig) (userID string, valid 
 	return subject, true
 }
 
-func refreshAccessToken(token string, config AuthConfig) (userID string, valid bool) {
-	credentialAuth, ok := config.authProvider.(*auth.CredentialService)
+func refreshAccessToken(refreshToken string, config auth.MiddlewareConfig) (userID string, jwtToken models.JWTToken, valid bool) {
+	credentialAuth, ok := config.AuthProvider.(*auth.CredentialService)
 	if !ok {
-		return "", false
+		return "", "", false
 	}
 
-	jwtToken, err := credentialAuth.RefreshJwtToken(models.RefreshToken(token))
+	jwtToken, err := credentialAuth.RefreshJwtToken(models.RefreshToken(refreshToken))
 	if err != nil {
-		return "", false
+		return "", "", false
 	}
 
 	claims, err := credentialAuth.ValidateJwtToken(jwtToken)
 	if err != nil {
-		return "", false
+		return "", "", false
 	}
 
 	subject, err := claims.GetSubject()
 	if err != nil {
-		return "", false
+		return "", "", false
 	}
 
-	return subject, true
+	return subject, jwtToken, true
 }
 
-func issueNewTokens(c echo.Context, userID string) {
-	// TODO: Set new access/refresh tokens in cookies or headers
+func issueNewTokensHeaders(c echo.Context, accessToken string, refreshToken string) {
+	c.Response().Header().Set("X-Access-Token", accessToken)
+	c.Response().Header().Set("X-Refresh-Token", refreshToken)
 }
