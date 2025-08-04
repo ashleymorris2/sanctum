@@ -9,7 +9,7 @@ export const actions: Actions = {
 		const password = formData.get('password')?.toString();
 
 		if (!email && !password) {
-			return fail(400, { globalError: 'Email and Password is required' });
+			return fail(400, { error: 'Email and Password is required' });
 		}
 		if (!email) {
 			return fail(400, { email: 'Email is required' });

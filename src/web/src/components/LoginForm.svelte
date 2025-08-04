@@ -1,59 +1,53 @@
 <script lang="ts">
-    import { enhance } from '$app/forms';
-    import { goto } from '$app/navigation';
+    import {enhance, applyAction} from '$app/forms';
+    import {goto} from '$app/navigation';
 
     let email = $state('');
     let password = $state('');
 
-    const clientErrors = $state({email: '', password: ''});
-    let serverErrors = $state({email: '', password: '',});
-
-    // const formData = $derived(page.form as PageData['form']);
+    const clientErrors = $state({email: '', password: '', error: '', message: ''});
 
     const errors = $derived.by(() => ({
-        email: clientErrors.email ?? serverErrors?.email,
-        password: clientErrors.password ?? serverErrors?.password,
-        globalError: clientErrors.globalError ?? serverErrors?.globalError
+        email: clientErrors.email,
+        password: clientErrors.password,
+        error: clientErrors.error,
+        message: clientErrors.message
     }));
 
-    const onLoginEnhance = ({cancel}) => {
-
+    const validateEmail = (email: string, cancel: () => void): boolean => {
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
             cancel();
             clientErrors.email = 'Please enter a valid email';
+            return false;
+        }
+
+        clientErrors.email = '';
+        clientErrors.message = '';
+        return true;
+    };
+
+    const onLoginEnhance = ({cancel}) => {
+
+        if (!validateEmail(email, cancel)) {
             return;
         }
 
         return async ({result, update}) => {
-            // // Client-side validation before server
-            clientErrors.email = '';
-            clientErrors.password = '';
-            serverErrors.email = '';
-            serverErrors.password = '';
-
-
-            console.log('form before update', result);
-
-            // Let SvelteKit populate `form` prop and handle `fail()` or `redirect()`
             await update({reset: false, invalidateAll: false});
-
-            console.log('form after update', result);
 
             if (result.type === 'redirect') {
                 // SvelteKit might have redirected or returned success; handle redirection here
                 await goto(result.location);
-            } else if (result.type === 'failure') {
-                // At this point, `form` contains your server-side error object
-                // e.g., `form.email`, `form.password`, `form.globalError`
-                // you can also set focus or tools here
-                if (result.data.email) serverErrors.email = result.data.email;
-                if (result.data.password) serverErrors.password = result.data.password;
-                console.log(result);
             } else {
-                // successful submission without redirect
+                if (result.data.email) clientErrors.email = result.data.email;
+                if (result.data.password) clientErrors.password = result.data.password;
+                if (result.data.error) clientErrors.error = result.data.error;
+                if (result.data.message) clientErrors.message = result.data.message;
+
+                await applyAction(result);
             }
         };
-    };
+    }
 </script>
 
 <div class="w-full max-w-md">
@@ -63,14 +57,14 @@
     </div>
 
     <div class="min-h-[50px] mt-4">
-        {#if errors.email || errors.password || errors.globalError}
+        {#if errors.email || errors.password || errors.error || errors.message}
             <div role="alert" class="alert alert-error">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none"
                      viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
-                <span>{errors.email || errors.password || errors.globalError}</span>
+                <span>{errors.email || errors.password || errors.error || errors.message}</span>
             </div>
         {/if}
     </div>
@@ -89,9 +83,15 @@
                         bind:value={email}
                         placeholder="Email address"
                         autocomplete="email"
+                        on:input={() =>{
+                             if (validateEmail(email)) {
+                                clientErrors.email = '';
+                                clientErrors.message = '';
+                            }
+                        }}
                         required
                         class="input input-lg input-bordered w-full"
-                        class:input-error={!!errors.email}
+                        class:input-error={!!errors.email || !!errors.message}
                 />
             </label>
             <label class="floating-label mt-4">
@@ -104,9 +104,13 @@
                         bind:value={password}
                         placeholder="Password"
                         autocomplete="current-password"
+                        on:input={() =>{
+                            clientErrors.password = '';
+                            clientErrors.message = '';
+                        }}
                         required
                         class="input input-lg input-bordered w-full"
-                        class:input-error={!!errors.password}
+                        class:input-error={!!errors.password || errors.message}
                 />
             </label>
 
