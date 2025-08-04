@@ -37,3 +37,12 @@ func (r *RefreshTokenRepository) InsertRefreshToken(ctx context.Context, refresh
 	}
 	return nil
 }
+
+func (r *RefreshTokenRepository) GetRefreshToken(ctx context.Context, refreshToken models.RefreshToken) (*sqlc.RefreshToken, error) {
+	token, err := r.db.GetRefreshToken(ctx, refreshToken.String())
+	if err != nil {
+		return nil, err
+	}
+
+	return &token, nil
+}

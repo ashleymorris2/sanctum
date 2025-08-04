@@ -6,7 +6,7 @@ import (
 	"metrics/internal/models"
 )
 
-func GenerateRefreshToken() (models.RefreshToken, error) {
+func generateRefreshToken() (models.RefreshToken, error) {
 	b := make([]byte, 32)
 	_, err := rand.Read(b)
 	if err != nil {
