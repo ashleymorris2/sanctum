@@ -28,7 +28,7 @@ func (a *Auth) Login(c echo.Context) error {
 	if err := c.Bind(&req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, ErrorResponse{Message: "Invalid request"})
 	}
-	
+
 	if err := c.Validate(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, validators.FormatErrors(err))
 	}
@@ -47,7 +47,8 @@ func (a *Auth) Login(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]string{
-		"token":  authResult.Token,
-		"userId": authResult.UserID,
+		"token":        authResult.JWTToken.String(),
+		"refreshToken": authResult.RefreshToken.String(),
+		"userId":       authResult.UserID,
 	})
 }

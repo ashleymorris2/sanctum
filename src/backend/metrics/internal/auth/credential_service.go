@@ -5,26 +5,27 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/golang-jwt/jwt/v5"
-	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
+	"metrics/internal/db/repositories"
 	"metrics/internal/db/sqlc"
 	"time"
 )
 
 var (
-	ErrAuthFailure     = errors.New("invalid credentials")
-	ErrDatabaseFailure = errors.New("database error during authentication")
-	ErrTokenGeneration = errors.New("failed to generate authentication token")
+	ErrAuthFailure            = errors.New("invalid credentials")
+	ErrDatabaseFailure        = errors.New("database error during authentication")
+	ErrJwtTokenGeneration     = errors.New("failed to generate authentication token")
+	ErrRefreshTokenGeneration = errors.New("failed to generate refresh token")
 )
 
 // CredentialService handles user authentication and registration using basic email-password credentials.
 // It hashes passwords using bcrypt, interacts with the database to persist user records, and generates JWT tokens
 // for session management. It relies on sqlc.Queries for database operations and supports configurable JWT timeouts.
 type CredentialService struct {
-	queries      *sqlc.Queries
-	jwtSecret    []byte
-	tokenTimeout time.Duration
+	queries          *sqlc.Queries
+	refreshTokenRepo repositories.RefreshTokenRepository
+	jwtSecret        []byte
+	jwtTokenTTL      time.Duration
 }
 
 // Option modifies the configuration of a CredentialService by applying custom settings through functional options.
@@ -33,7 +34,7 @@ type Option func(*CredentialService)
 // WithTokenTimeout sets the token expiration timeout to the specified duration in a CredentialService instance.
 func WithTokenTimeout(d time.Duration) Option {
 	return func(p *CredentialService) {
-		p.tokenTimeout = d
+		p.jwtTokenTTL = d
 	}
 }
 
@@ -50,11 +51,12 @@ func WithTokenTimeout(d time.Duration) Option {
 //	    []byte("your-jwt-secret"),
 //	    auth.WithTokenTimeout(24 * time.Hour),
 //	)
-func ByCredentials(queries *sqlc.Queries, jwtSecret []byte, opts ...Option) *CredentialService {
+func ByCredentials(queries *sqlc.Queries, refreshTokenRepo repositories.RefreshTokenRepository, jwtSecret []byte, opts ...Option) *CredentialService {
 	p := &CredentialService{
-		queries:      queries,
-		jwtSecret:    jwtSecret,
-		tokenTimeout: 15 * time.Minute,
+		queries:          queries,
+		refreshTokenRepo: refreshTokenRepo,
+		jwtSecret:        jwtSecret,
+		jwtTokenTTL:      15 * time.Minute,
 	}
 	for _, opt := range opts {
 		opt(p)
@@ -81,12 +83,17 @@ func (p *CredentialService) Register(ctx context.Context, email, password string
 		return nil, err
 	}
 
-	token, err := p.generateJWT(user.ID)
+	jwtToken, err := generateJWT(user.ID, p.jwtTokenTTL, p.jwtSecret)
 	if err != nil {
 		return nil, err
 	}
 
-	return &Result{UserID: user.ID.String(), Email: user.Email, Token: token}, nil
+	//refreshToken, err := GenerateRefreshToken()
+	//if err != nil {
+	//	return nil, err
+	//}
+
+	return &Result{UserID: user.ID.String(), Email: user.Email, JWTToken: jwtToken}, nil
 }
 
 func (p *CredentialService) Authenticate(ctx context.Context, email, password string) (*Result, error) {
@@ -104,24 +111,27 @@ func (p *CredentialService) Authenticate(ctx context.Context, email, password st
 		return nil, ErrAuthFailure
 	}
 
-	token, err := p.generateJWT(user.ID)
+	jwtToken, err := generateJWT(user.ID, p.jwtTokenTTL, p.jwtSecret)
 	if err != nil {
-		return nil, ErrTokenGeneration
+		//todo log
+		return nil, ErrJwtTokenGeneration
 	}
 
-	return &Result{UserID: user.ID.String(), Email: user.Email, Token: token}, nil
-}
-
-func (p *CredentialService) generateJWT(userID uuid.UUID) (string, error) {
-	now := time.Now()
-	claims := jwt.MapClaims{
-		"sub": userID.String(),                //Subject - who is the token for
-		"exp": now.Add(p.tokenTimeout).Unix(), // Expiration time (unix timestamp)
-		"iat": now.Unix(),                     // Issued at: time when the token was generated (unix timestamp)
-		"nbf": now.Unix(),                     //Not before: defines the time before which the JWT cannot be accepted for processing.
-		"jti": now.String(),                   //JWT ID: an identifier for the JWT, which can be used to prevent the JWT from being replayed.
+	refreshToken, err := GenerateRefreshToken()
+	if err != nil {
+		//todo log
+		return nil, ErrRefreshTokenGeneration
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(p.jwtSecret)
+	err = p.refreshTokenRepo.InsertRefreshToken(ctx, refreshToken, user.ID, p.jwtTokenTTL)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %v", ErrDatabaseFailure, err)
+	}
+
+	return &Result{
+		UserID:       user.ID.String(),
+		JWTToken:     jwtToken,
+		RefreshToken: refreshToken,
+		Email:        user.Email,
+	}, nil
 }

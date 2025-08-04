@@ -1,6 +1,9 @@
 package auth
 
-import "context"
+import (
+	"context"
+	"metrics/internal/models"
+)
 
 type Provider interface {
 	Register(ctx context.Context, email, password string) (*Result, error)
@@ -8,7 +11,8 @@ type Provider interface {
 }
 
 type Result struct {
-	UserID string
-	Token  string
-	Email  string
+	UserID       string
+	JWTToken     models.JWTToken
+	RefreshToken models.RefreshToken
+	Email        string
 }
