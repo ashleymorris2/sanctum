@@ -16,3 +16,11 @@ type Result struct {
 	RefreshToken models.RefreshToken
 	Email        string
 }
+
+type MiddlewareConfig struct {
+	authProvider Provider
+}
+
+func NewMiddlewareConfig(authProvider Provider) MiddlewareConfig {
+	return MiddlewareConfig{authProvider: authProvider}
+}

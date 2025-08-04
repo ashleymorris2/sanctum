@@ -160,6 +160,7 @@ func (cs *CredentialService) ValidateJwtToken(jwtToken models.JWTToken) (jwt.Map
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		return claims, nil
 	}
+
 	return nil, ErrInvalidJwtToken
 }
 
@@ -191,5 +192,6 @@ func (cs *CredentialService) RefreshJwtToken(refreshToken models.RefreshToken) (
 	if err != nil {
 		return "", err
 	}
+
 	return jwtToken, nil
 }
