@@ -1,42 +1,32 @@
 <script lang="ts">
-    import {deserialize} from '$app/forms';
+    import { enhance } from '$app/forms';
+    import { goto } from '$app/navigation';
 
-    let emailError = '';
-    let passwordError = '';
-    let globalError = '';
+    export let form; // SvelteKit action response
 
-    async function handleSubmit(event: Event) {
-        event.preventDefault();
-        const formData = new FormData(event.target as HTMLFormElement);
-        const res = await fetch('/login', {
-                method: 'POST',
-                body: formData
+    let email = '';
+    let password = '';
+
+    const onLoginEnhance = ({ formData, cancel }) => {
+        return async ({ result, update }) => {
+            // Client-side validation before server: optional
+            // form.resetGlobalError?.(); // remove global errors on each attempt
+
+            // Let SvelteKit populate `form` prop and handle `fail()` or `redirect()`
+            await update({ reset: false, invalidateAll: false });
+
+            if (result.type === 'redirect') {
+                // SvelteKit might have redirected or returned success; handle redirection here
+                await goto(result.location);
+            } else if (result.type === 'failure') {
+                // At this point, `form` contains your server-side error object
+                // e.g., `form.email`, `form.password`, `form.globalError`
+                // you can also set focus or tools here
+            } else {
+                // successful submission without redirect
             }
-        );
-
-        // Handle redirect manually
-        if (res.redirected) {
-            window.location.href = res.url;
-            return;
-        }
-
-        const result = deserialize(await res.text());
-        const errorData = result.data;
-
-        // Reset previous errors
-        emailError = '';
-        passwordError = '';
-        globalError = '';
-
-        // Assign errors from backend
-        if (typeof errorData === 'object' && errorData !== null) {
-            emailError = errorData.email ?? '';
-            passwordError = errorData.password ?? '';
-            globalError = errorData.globalError ?? '';
-        } else if (typeof errorData === 'string') {
-            globalError = errorData;
-        }
-    }
+        };
+    };
 </script>
 
 <div class="w-full max-w-md">
@@ -46,19 +36,19 @@
     </div>
 
     <div class="min-h-[50px] mt-4">
-        {#if emailError || passwordError || globalError}
+        {#if form?.email || form?.password || form?.globalError}
             <div role="alert" class="alert alert-error">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none"
                      viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
-                <span>{emailError || passwordError || globalError}</span>
+                <span>{form?.email || form?.password || form?.globalError}</span>
             </div>
         {/if}
     </div>
 
-    <form method="POST" on:submit={handleSubmit} class="card mx-auto mt-2 card-body max-w-sm" novalidate>
+    <form method="POST" action="/login"  use:enhance={onLoginEnhance} class="card mx-auto mt-2 card-body max-w-sm" novalidate>
         <div>
             <label class="floating-label mb-4">
                 <span class="label">
@@ -72,7 +62,7 @@
                         autocomplete="email"
                         required
                         class="input input-lg  input-bordered w-full"
-                        class:input-error={ !!emailError || !!globalError}
+                        class:input-error={ !!form?.email || !!form?.globalError}
                 />
             </label>
             <label class="floating-label mt-4">
@@ -86,7 +76,7 @@
                         autocomplete="current-password"
                         required
                         class="input input-lg input-bordered w-full input-error"
-                        class:input-error={ !!passwordError || !!globalError}
+                        class:input-error={ !!form?.password || !!form?.globalError}
                 />
             </label>
             <!--            <p class="text-sm">{true || '\u00A0'}</p>-->
