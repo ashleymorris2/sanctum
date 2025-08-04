@@ -15,7 +15,7 @@ export const actions: Actions = {
 			return fail(400, { email: 'Email is required' });
 		}
 		if (!password) {
-			return fail(400, { email: 'Password is required' });
+			return fail(400, { password: 'Password is required' });
 		}
 
 		try {
