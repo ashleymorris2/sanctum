@@ -3,15 +3,16 @@ package auth
 import (
 	"crypto/rand"
 	"encoding/base64"
-	"metrics/internal/models"
+	"github.com/google/uuid"
+	"metrics/internal/model"
 )
 
-func generateRefreshToken() (models.RefreshToken, error) {
+func generateRefreshToken() (model.RefreshToken, error) {
 	b := make([]byte, 32)
 	_, err := rand.Read(b)
 	if err != nil {
 		return "", err
 	}
 
-	return models.NewRefreshToken(base64.URLEncoding.EncodeToString(b)), nil
+	return model.NewRefreshToken(uuid.New(), base64.URLEncoding.EncodeToString(b)), nil
 }

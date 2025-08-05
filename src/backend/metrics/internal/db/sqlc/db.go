@@ -30,6 +30,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getRefreshTokenStmt, err = db.PrepareContext(ctx, getRefreshToken); err != nil {
 		return nil, fmt.Errorf("error preparing query GetRefreshToken: %w", err)
 	}
+	if q.getRefreshTokenByIdStmt, err = db.PrepareContext(ctx, getRefreshTokenById); err != nil {
+		return nil, fmt.Errorf("error preparing query GetRefreshTokenById: %w", err)
+	}
 	if q.getUserByEmailStmt, err = db.PrepareContext(ctx, getUserByEmail); err != nil {
 		return nil, fmt.Errorf("error preparing query GetUserByEmail: %w", err)
 	}
@@ -52,6 +55,11 @@ func (q *Queries) Close() error {
 	if q.getRefreshTokenStmt != nil {
 		if cerr := q.getRefreshTokenStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getRefreshTokenStmt: %w", cerr)
+		}
+	}
+	if q.getRefreshTokenByIdStmt != nil {
+		if cerr := q.getRefreshTokenByIdStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getRefreshTokenByIdStmt: %w", cerr)
 		}
 	}
 	if q.getUserByEmailStmt != nil {
@@ -106,23 +114,25 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 }
 
 type Queries struct {
-	db                     DBTX
-	tx                     *sql.Tx
-	createUserStmt         *sql.Stmt
-	getRefreshTokenStmt    *sql.Stmt
-	getUserByEmailStmt     *sql.Stmt
-	getUserByIdStmt        *sql.Stmt
-	insertRefreshTokenStmt *sql.Stmt
+	db                      DBTX
+	tx                      *sql.Tx
+	createUserStmt          *sql.Stmt
+	getRefreshTokenStmt     *sql.Stmt
+	getRefreshTokenByIdStmt *sql.Stmt
+	getUserByEmailStmt      *sql.Stmt
+	getUserByIdStmt         *sql.Stmt
+	insertRefreshTokenStmt  *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
-		db:                     tx,
-		tx:                     tx,
-		createUserStmt:         q.createUserStmt,
-		getRefreshTokenStmt:    q.getRefreshTokenStmt,
-		getUserByEmailStmt:     q.getUserByEmailStmt,
-		getUserByIdStmt:        q.getUserByIdStmt,
-		insertRefreshTokenStmt: q.insertRefreshTokenStmt,
+		db:                      tx,
+		tx:                      tx,
+		createUserStmt:          q.createUserStmt,
+		getRefreshTokenStmt:     q.getRefreshTokenStmt,
+		getRefreshTokenByIdStmt: q.getRefreshTokenByIdStmt,
+		getUserByEmailStmt:      q.getUserByEmailStmt,
+		getUserByIdStmt:         q.getUserByIdStmt,
+		insertRefreshTokenStmt:  q.insertRefreshTokenStmt,
 	}
 }

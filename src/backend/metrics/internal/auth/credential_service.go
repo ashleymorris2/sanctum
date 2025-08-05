@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"crypto/subtle"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -9,7 +10,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"metrics/internal/db/repositories"
 	"metrics/internal/db/sqlc"
-	"metrics/internal/models"
+	"metrics/internal/dto"
+	"metrics/internal/model"
 	"time"
 )
 
@@ -69,7 +71,7 @@ func ByCredentials(queries *sqlc.Queries, refreshTokenRepo repositories.RefreshT
 	return p
 }
 
-func (cs *CredentialService) Register(ctx context.Context, email, password string) (*Result, error) {
+func (cs *CredentialService) Register(ctx context.Context, email, password string) (*dto.CredentialAuthResult, error) {
 	if email == "" || password == "" {
 		return nil, errors.New("email and/or password cannot be empty")
 	}
@@ -93,15 +95,21 @@ func (cs *CredentialService) Register(ctx context.Context, email, password strin
 		return nil, err
 	}
 
-	//refreshToken, err := generateRefreshToken()
-	//if err != nil {
-	//	return nil, err
-	//}
+	refreshToken, err := generateRefreshToken()
+	if err != nil {
+		//todo log
+		return nil, ErrRefreshTokenGeneration
+	}
 
-	return &Result{UserID: user.ID.String(), Email: user.Email, JWTToken: jwtToken}, nil
+	return &dto.CredentialAuthResult{
+		UserID:       user.ID.String(),
+		JWTToken:     jwtToken,
+		RefreshToken: refreshToken,
+		Email:        user.Email,
+	}, nil
 }
 
-func (cs *CredentialService) Authenticate(ctx context.Context, email, password string) (*Result, error) {
+func (cs *CredentialService) Authenticate(ctx context.Context, email, password string) (*dto.CredentialAuthResult, error) {
 	user, err := cs.queries.GetUserByEmail(ctx, email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -133,7 +141,7 @@ func (cs *CredentialService) Authenticate(ctx context.Context, email, password s
 		return nil, fmt.Errorf("%s: %v", ErrDatabaseFailure, err)
 	}
 
-	return &Result{
+	return &dto.CredentialAuthResult{
 		UserID:       user.ID.String(),
 		JWTToken:     jwtToken,
 		RefreshToken: refreshToken,
@@ -141,7 +149,7 @@ func (cs *CredentialService) Authenticate(ctx context.Context, email, password s
 	}, nil
 }
 
-func (cs *CredentialService) ValidateJwtToken(jwtToken models.JWTToken) (jwt.MapClaims, error) {
+func (cs *CredentialService) ValidateJwtToken(jwtToken model.JWTToken) (jwt.MapClaims, error) {
 	// Parse the token
 	token, err := jwt.Parse(jwtToken.String(), func(token *jwt.Token) (interface{}, error) {
 		// Validate the signing method
@@ -164,21 +172,10 @@ func (cs *CredentialService) ValidateJwtToken(jwtToken models.JWTToken) (jwt.Map
 	return nil, ErrInvalidJwtToken
 }
 
-func (cs *CredentialService) RefreshJwtToken(refreshToken models.RefreshToken) (models.JWTToken, error) {
-	// Retrieve the refresh token
-	token, err := cs.refreshTokenRepo.GetRefreshToken(context.Background(), refreshToken)
+func (cs *CredentialService) RefreshJwtToken(refreshToken model.RefreshToken) (model.JWTToken, error) {
+	token, err := cs.ValidateRefreshToken(refreshToken)
 	if err != nil {
-		return "", ErrInvalidRefreshToken
-	}
-
-	// Check if the token is valid
-	if token.Revoked {
-		return "", ErrInvalidRefreshToken
-	}
-
-	// Check if the token has expired
-	if time.Now().After(token.ExpiresAt) {
-		return "", ErrExpiredRefreshToken
+		return "", err
 	}
 
 	// Get the user
@@ -194,4 +191,28 @@ func (cs *CredentialService) RefreshJwtToken(refreshToken models.RefreshToken) (
 	}
 
 	return jwtToken, nil
+}
+
+func (cs *CredentialService) ValidateRefreshToken(refreshToken model.RefreshToken) (*sqlc.RefreshToken, error) {
+	// Retrieve the refresh token
+	token, err := cs.refreshTokenRepo.GetRefreshToken(context.Background(), refreshToken)
+	if err != nil {
+		return nil, ErrInvalidRefreshToken
+	}
+	
+	if subtle.ConstantTimeCompare([]byte(token.Token), []byte(refreshToken.Hashed())) != 1 {
+		return nil, errors.New("invalid token")
+	}
+
+	// Check if the token is revoked
+	if token.Revoked {
+		return nil, ErrInvalidRefreshToken
+	}
+
+	// Check if the token has expired
+	if time.Now().After(token.ExpiresAt) {
+		return nil, ErrExpiredRefreshToken
+	}
+
+	return token, nil
 }

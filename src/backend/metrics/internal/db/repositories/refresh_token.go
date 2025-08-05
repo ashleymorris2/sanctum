@@ -2,9 +2,10 @@ package repositories
 
 import (
 	"context"
+	"errors"
 	"github.com/google/uuid"
 
-	"metrics/internal/models"
+	"metrics/internal/model"
 
 	"metrics/internal/db/sqlc"
 	"time"
@@ -19,13 +20,12 @@ func NewRefreshTokenRepository(db *sqlc.Queries) *RefreshTokenRepository {
 	return &RefreshTokenRepository{db: db}
 }
 
-func (r *RefreshTokenRepository) InsertRefreshToken(ctx context.Context, refreshToken models.RefreshToken, userID uuid.UUID, ttl time.Duration) error {
-	tokenID := uuid.New()
+func (r *RefreshTokenRepository) InsertRefreshToken(ctx context.Context, refreshToken model.RefreshToken, userID uuid.UUID, ttl time.Duration) error {
 	expiresAt := time.Now().Add(ttl)
 	params := &sqlc.InsertRefreshTokenParams{
-		ID:        tokenID,
+		ID:        refreshToken.ID(),
 		UserID:    userID,
-		Token:     refreshToken.String(),
+		Token:     refreshToken.Hashed(),
 		ExpiresAt: expiresAt,
 		CreatedAt: time.Now(),
 		Revoked:   false,
@@ -38,10 +38,10 @@ func (r *RefreshTokenRepository) InsertRefreshToken(ctx context.Context, refresh
 	return nil
 }
 
-func (r *RefreshTokenRepository) GetRefreshToken(ctx context.Context, refreshToken models.RefreshToken) (*sqlc.RefreshToken, error) {
-	token, err := r.db.GetRefreshToken(ctx, refreshToken.String())
+func (r *RefreshTokenRepository) GetRefreshToken(ctx context.Context, refreshToken model.RefreshToken) (*sqlc.RefreshToken, error) {
+	token, err := r.db.GetRefreshTokenById(ctx, refreshToken.ID())
 	if err != nil {
-		return nil, err
+		return nil, errors.New("token not found")
 	}
 
 	return &token, nil

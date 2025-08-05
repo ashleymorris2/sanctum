@@ -23,19 +23,19 @@ type Server struct {
 }
 
 func New() *Server {
-	conn := dbConect()
+	conn := dbConnect()
 	queries := sqlc.New(conn)
-
-	authProvider := configureAuth(queries)
+	authService := configureAuth(queries)
 
 	e := echo.New()
 	e.Validator = validators.NewRequestValidator()
 
-	e.Use(middleware.AuthMiddleware(auth.NewMiddlewareConfig(authProvider)))
+	public := e.Group("/api")
+	routes.RegisterAuthFor(public, authService)
 
-	api := e.Group("/api")
-	routes.RegisterAuthFor(api, authProvider)
-	routes.RegisterMetricsFor(api)
+	private := e.Group("/api")
+	private.Use(middleware.AuthMiddleware(auth.NewMiddlewareConfig(authService)))
+	routes.RegisterMetricsFor(private)
 
 	return &Server{
 		Echo: e,
@@ -50,7 +50,7 @@ func configureAuth(queries *sqlc.Queries) auth.Provider {
 		[]byte(os.Getenv("JWT_SECRET")))
 }
 
-func dbConect() *sql.DB {
+func dbConnect() *sql.DB {
 	dbCtx, dbCancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer dbCancel()
 

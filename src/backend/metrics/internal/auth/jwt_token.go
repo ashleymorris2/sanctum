@@ -3,11 +3,11 @@ package auth
 import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
-	"metrics/internal/models"
+	"metrics/internal/model"
 	"time"
 )
 
-func generateJWT(userID uuid.UUID, tokenTTL time.Duration, jwtSecret []byte) (models.JWTToken, error) {
+func generateJWT(userID uuid.UUID, tokenTTL time.Duration, jwtSecret []byte) (model.JWTToken, error) {
 	now := time.Now()
 	claims := jwt.MapClaims{
 		"sub": userID.String(),          //Subject - who is the token for
@@ -23,5 +23,5 @@ func generateJWT(userID uuid.UUID, tokenTTL time.Duration, jwtSecret []byte) (mo
 		return "", err
 	}
 
-	return models.NewJWTToken(jwtToken), nil
+	return model.NewJWTToken(jwtToken), nil
 }
