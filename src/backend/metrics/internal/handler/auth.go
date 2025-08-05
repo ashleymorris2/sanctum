@@ -4,14 +4,11 @@ import (
 	"errors"
 	"github.com/labstack/echo/v4"
 	"metrics/internal/auth"
+	"metrics/internal/dto"
+	"metrics/internal/model"
 	"metrics/internal/validators"
 	"net/http"
 )
-
-type RequestDTO struct {
-	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required,min=6,max=128"`
-}
 
 type Auth struct {
 	authProvider auth.Provider
@@ -24,7 +21,7 @@ func NewAuth(authProvider auth.Provider) *Auth {
 func (a *Auth) Login(c echo.Context) error {
 	ctx := c.Request().Context()
 
-	var req RequestDTO
+	var req dto.LoginRequest
 	if err := c.Bind(&req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, ErrorResponse{Message: "Invalid request"})
 	}
@@ -50,5 +47,32 @@ func (a *Auth) Login(c echo.Context) error {
 		"token":        authResult.JWTToken.String(),
 		"refreshToken": authResult.RefreshToken.String(),
 		"userId":       authResult.UserID,
+	})
+}
+
+func (a *Auth) Verify(c echo.Context) error {
+	token, err := auth.JwtTokenFromHeader(c.Request())
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "Missing or invalid token")
+	}
+
+	credentialService, ok := a.authProvider.(*auth.CredentialService)
+	if !ok {
+		//Not configured for credential auth
+		return echo.NewHTTPError(http.StatusInternalServerError, "`Internal server error`")
+	}
+
+	claims, err := credentialService.ValidateJwtToken(model.JWTToken(token))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "Invalid or expired token")
+	}
+
+	sub, err := claims.GetSubject()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "Invalid token")
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{
+		"id": sub,
 	})
 }

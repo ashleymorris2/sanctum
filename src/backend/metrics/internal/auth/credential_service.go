@@ -10,7 +10,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"metrics/internal/db/repositories"
 	"metrics/internal/db/sqlc"
-	"metrics/internal/dto"
+
 	"metrics/internal/model"
 	"time"
 )
@@ -24,6 +24,15 @@ var (
 	ErrInvalidRefreshToken    = errors.New("invalid refresh token")
 	ErrExpiredRefreshToken    = errors.New("refresh token has expired")
 )
+
+// CredentialAuthResult represents the result of an authentication operation using credentials.
+// It includes the authenticated user's ID, JWT access token, a refresh token for session renewal, and the user's email.
+type CredentialAuthResult struct {
+	UserID       string
+	JWTToken     model.JWTToken
+	RefreshToken model.RefreshToken
+	Email        string
+}
 
 // CredentialService handles user authentication and registration using basic email-password credentials.
 // It hashes passwords using bcrypt, interacts with the database to persist user records, and generates JWT tokens
@@ -71,7 +80,7 @@ func ByCredentials(queries *sqlc.Queries, refreshTokenRepo repositories.RefreshT
 	return p
 }
 
-func (cs *CredentialService) Register(ctx context.Context, email, password string) (*dto.CredentialAuthResult, error) {
+func (cs *CredentialService) Register(ctx context.Context, email, password string) (*CredentialAuthResult, error) {
 	if email == "" || password == "" {
 		return nil, errors.New("email and/or password cannot be empty")
 	}
@@ -101,7 +110,7 @@ func (cs *CredentialService) Register(ctx context.Context, email, password strin
 		return nil, ErrRefreshTokenGeneration
 	}
 
-	return &dto.CredentialAuthResult{
+	return &CredentialAuthResult{
 		UserID:       user.ID.String(),
 		JWTToken:     jwtToken,
 		RefreshToken: refreshToken,
@@ -109,7 +118,7 @@ func (cs *CredentialService) Register(ctx context.Context, email, password strin
 	}, nil
 }
 
-func (cs *CredentialService) Authenticate(ctx context.Context, email, password string) (*dto.CredentialAuthResult, error) {
+func (cs *CredentialService) Authenticate(ctx context.Context, email, password string) (*CredentialAuthResult, error) {
 	user, err := cs.queries.GetUserByEmail(ctx, email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -141,7 +150,7 @@ func (cs *CredentialService) Authenticate(ctx context.Context, email, password s
 		return nil, fmt.Errorf("%s: %v", ErrDatabaseFailure, err)
 	}
 
-	return &dto.CredentialAuthResult{
+	return &CredentialAuthResult{
 		UserID:       user.ID.String(),
 		JWTToken:     jwtToken,
 		RefreshToken: refreshToken,
@@ -150,6 +159,7 @@ func (cs *CredentialService) Authenticate(ctx context.Context, email, password s
 }
 
 func (cs *CredentialService) ValidateJwtToken(jwtToken model.JWTToken) (jwt.MapClaims, error) {
+
 	// Parse the token
 	token, err := jwt.Parse(jwtToken.String(), func(token *jwt.Token) (interface{}, error) {
 		// Validate the signing method
@@ -158,12 +168,14 @@ func (cs *CredentialService) ValidateJwtToken(jwtToken model.JWTToken) (jwt.MapC
 		}
 		return cs.jwtSecret, nil
 	})
+
 	if err != nil {
 		if errors.Is(err, jwt.ErrTokenExpired) {
 			return nil, err
 		}
 		return nil, ErrInvalidJwtToken
 	}
+
 	// Extract and validate claims
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		return claims, nil
@@ -199,7 +211,7 @@ func (cs *CredentialService) ValidateRefreshToken(refreshToken model.RefreshToke
 	if err != nil {
 		return nil, ErrInvalidRefreshToken
 	}
-	
+
 	if subtle.ConstantTimeCompare([]byte(token.Token), []byte(refreshToken.Hashed())) != 1 {
 		return nil, errors.New("invalid token")
 	}

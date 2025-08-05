@@ -1,23 +1,41 @@
 import { redirect, type Handle } from '@sveltejs/kit';
-import { isProtectedRoute } from '$lib/server/auth';
+import { isProtectedRoute, verifyAuthToken, refreshAuthToken } from '$lib/server/auth';
 
 export const handle: Handle = async ({ event, resolve }) => {
-	// let user = null;
-	const token = event.cookies.get('auth');
+	const authToken = event.cookies.get('auth');
+	const refreshToken = event.cookies.get('refresh_token');
 
 	if (isProtectedRoute(event.route.id ?? undefined)) {
-		if (token) {
-			try {
-				//  validate the JWT here or trust it
-				// event.locals.user = await pb.verifyJWT(token);
-			} catch {
-				// event.locals.user = null;
-				// event.cookies.delete('auth');
-			}
-		} else {
-			// event.locals.user = null;
+		if (!authToken && !refreshToken) {
 			return redirect(302, '/login');
 		}
+
+		if (authToken) {
+			const user = await verifyAuthToken(authToken);
+			if (user) {
+				event.locals.user = user;
+				return resolve(event);
+			}
+		}
+
+		// Try refreshing if access token invalid or missing
+		if (refreshToken) {
+			const result = await refreshAuthToken(refresh);
+			if (result?.user && result?.token) {
+				event.cookies.set('auth', result.token, {
+					httpOnly: true,
+					path: '/',
+					sameSite: 'lax',
+					secure: process.env.NODE_ENV === 'production',
+					maxAge: 60 * 15 // 15 min
+				});
+
+				event.locals.user = result.user;
+				return resolve(event);
+			}
+		}
+
+		return redirect(302, '/login');
 	}
 
 	return resolve(event);

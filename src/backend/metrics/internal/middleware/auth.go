@@ -5,23 +5,17 @@ import (
 	"metrics/internal/auth"
 	"metrics/internal/model"
 	"net/http"
-	"strings"
 )
 
 func AuthMiddleware(config auth.MiddlewareConfig) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 
-			authHeader := c.Request().Header.Get("Authorization")
-
-			if authHeader != "" && strings.HasPrefix(authHeader, "Bearer ") {
-				token := strings.TrimPrefix(authHeader, "Bearer ")
-
-				if userID, ok := validateAccessToken(token, config); ok {
-					// Set userID in context for use in handler
-					c.Set("userID", userID)
-					return next(c)
-				}
+			token, _ := auth.JwtTokenFromHeader(c.Request())
+			if userID, ok := validateAccessToken(token.String(), config); ok {
+				// Set userID in context for use in handler
+				c.Set("userID", userID)
+				return next(c)
 			}
 
 			return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
