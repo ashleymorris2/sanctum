@@ -29,10 +29,12 @@ var (
 // CredentialAuthResult represents the result of an authentication operation using credentials.
 // It includes the authenticated user's ID, JWT access token, a refresh token for session renewal, and the user's email.
 type CredentialAuthResult struct {
-	UserID       string
-	JWTToken     model.JWTToken
-	RefreshToken model.RefreshToken
-	Email        string
+	UserID          string
+	AuthToken       model.JWTToken
+	AuthTokenTTL    time.Duration
+	RefreshToken    model.RefreshToken
+	RefreshTokenTTL time.Duration
+	Email           string
 }
 
 // CredentialService handles user authentication and registration using basic email-password credentials.
@@ -49,15 +51,15 @@ type CredentialService struct {
 // Option modifies the configuration of a CredentialService by applying custom settings through functional options.
 type Option func(*CredentialService)
 
-// WithAuthTokenTimeout sets the auth token expiration timeout to the specified duration in a CredentialService instance.
-func WithAuthTokenTimeout(d time.Duration) Option {
+// WithAuthTokenTTL sets the auth token expiration timeout to the specified duration in a CredentialService instance.
+func WithAuthTokenTTL(d time.Duration) Option {
 	return func(p *CredentialService) {
 		p.authTokenTTL = d
 	}
 }
 
-// WithRefreshTokenTimeout sets the refresh token expiration timeout to the specified duration in a CredentialService instance.
-func WithRefreshTokenTimeout(d time.Duration) Option {
+// WithRefreshTokenTTL sets the refresh token expiration timeout to the specified duration in a CredentialService instance.
+func WithRefreshTokenTTL(d time.Duration) Option {
 	return func(p *CredentialService) {
 		p.refreshTokenTTL = d
 	}
@@ -74,7 +76,7 @@ func WithRefreshTokenTimeout(d time.Duration) Option {
 //	provider := auth.ByCredentials(
 //	    queries,
 //	    []byte("your-jwt-secret"),
-//	    auth.WithAuthTokenTimeout(24 * time.Hour),
+//	    auth.WithAuthTokenTTL(24 * time.Hour),
 //	)
 func ByCredentials(queries *sqlc.Queries, refreshTokenRepo repositories.RefreshTokenRepository, jwtSecret []byte, opts ...Option) *CredentialService {
 	p := &CredentialService{
@@ -200,7 +202,7 @@ func (cs *CredentialService) issueTokenPair(ctx context.Context, user sqlc.User,
 		return nil, ErrJwtTokenGeneration
 	}
 
-	newRefreshToken, err := generateRefreshToken()
+	newRefreshToken, err := generateRefreshToken(cs.refreshTokenTTL)
 	if err != nil {
 		return nil, ErrRefreshTokenGeneration
 	}
@@ -218,9 +220,11 @@ func (cs *CredentialService) issueTokenPair(ctx context.Context, user sqlc.User,
 	}
 
 	return &CredentialAuthResult{
-		UserID:       user.ID.String(),
-		JWTToken:     jwtToken,
-		RefreshToken: newRefreshToken,
-		Email:        user.Email,
+		UserID:          user.ID.String(),
+		AuthToken:       jwtToken,
+		authTokenTTL:    cs.authTokenTTL,
+		RefreshToken:    newRefreshToken,
+		refreshTokenTTL: cs.refreshTokenTTL,
+		Email:           user.Email,
 	}, nil
 }

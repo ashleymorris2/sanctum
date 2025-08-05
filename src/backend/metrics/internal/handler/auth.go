@@ -8,7 +8,6 @@ import (
 	"metrics/internal/model"
 	"metrics/internal/validators"
 	"net/http"
-	"time"
 )
 
 type Auth struct {
@@ -51,11 +50,11 @@ func (a *Auth) Login(c echo.Context) error {
 		HttpOnly: true,
 		Secure:   true, // only send over HTTPS
 		SameSite: http.SameSiteStrictMode,
-		MaxAge:   int(28 * 24 * time.Hour.Seconds()),
+		MaxAge:   int(authResult.RefreshTokenTTL.Seconds()),
 	})
 
 	return c.JSON(http.StatusOK, map[string]string{
-		"auth_token": authResult.JWTToken.String(),
+		"auth_token": authResult.AuthToken.String(),
 		"userId":     authResult.UserID,
 	})
 }
@@ -100,12 +99,12 @@ func (a *Auth) RefreshAuthToken(c echo.Context) error {
 	credentialService, ok := a.authProvider.(*auth.CredentialService)
 	if !ok {
 		//Not configured for credential auth
-		return echo.NewHTTPError(http.StatusInternalServerError, "`Internal server error`")
+		return echo.NewHTTPError(http.StatusInternalServerError, "Internal server error")
 	}
 
 	refreshToken, err := model.ParseRefreshToken(req.RefreshToken)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusUnauthorized, "`Invalid refresh token`")
+		return echo.NewHTTPError(http.StatusUnauthorized, "Invalid refresh token")
 	}
 
 	tokenPair, err := credentialService.RefreshJwtToken(c.Request().Context(), refreshToken)
@@ -121,7 +120,7 @@ func (a *Auth) RefreshAuthToken(c echo.Context) error {
 		HttpOnly: true,
 		Secure:   true, // only send over HTTPS
 		SameSite: http.SameSiteStrictMode,
-		MaxAge:   int(28 * 24 * time.Hour.Seconds()),
+		MaxAge:   int(tokenPair.RefreshTokenTTL.Seconds()),
 	})
 
 	return c.JSON(http.StatusOK, dto.RefreshTokenResponse{

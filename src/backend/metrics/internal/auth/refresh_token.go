@@ -5,9 +5,10 @@ import (
 	"encoding/base64"
 	"github.com/google/uuid"
 	"metrics/internal/model"
+	"time"
 )
 
-func generateRefreshToken() (model.RefreshToken, error) {
+func generateRefreshToken(time.Duration) (model.RefreshToken, error) {
 	b := make([]byte, 32)
 	_, err := rand.Read(b)
 	if err != nil {
