@@ -108,16 +108,23 @@ func (a *Auth) RefreshAuthToken(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, "`Invalid refresh token`")
 	}
 
-	authToken, err := credentialService.RefreshJwtToken(refreshToken)
+	tokenPair, err := credentialService.RefreshJwtToken(c.Request().Context(), refreshToken)
 	if err != nil {
 		// Error handling...
 		return echo.NewHTTPError(http.StatusUnauthorized, "invalid token")
 	}
 
-	refreshToken, err = credentialService.Refresh
-
-	return c.JSON(http.StatusOK, dto.RefreshTokenResponse{
-		AuthToken: authToken.String(),
+	c.SetCookie(&http.Cookie{
+		Name:     "refresh_token",
+		Value:    tokenPair.RefreshToken.Token(),
+		Path:     "/refresh", // only sent on /refresh route
+		HttpOnly: true,
+		Secure:   true, // only send over HTTPS
+		SameSite: http.SameSiteStrictMode,
+		MaxAge:   int(28 * 24 * time.Hour.Seconds()),
 	})
 
+	return c.JSON(http.StatusOK, dto.RefreshTokenResponse{
+		AuthToken: tokenPair.AuthToken.String(),
+	})
 }

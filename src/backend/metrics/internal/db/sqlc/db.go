@@ -42,6 +42,15 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.insertRefreshTokenStmt, err = db.PrepareContext(ctx, insertRefreshToken); err != nil {
 		return nil, fmt.Errorf("error preparing query InsertRefreshToken: %w", err)
 	}
+	if q.invalidateAllTokensForUserStmt, err = db.PrepareContext(ctx, invalidateAllTokensForUser); err != nil {
+		return nil, fmt.Errorf("error preparing query InvalidateAllTokensForUser: %w", err)
+	}
+	if q.invalidateRefreshTokenStmt, err = db.PrepareContext(ctx, invalidateRefreshToken); err != nil {
+		return nil, fmt.Errorf("error preparing query InvalidateRefreshToken: %w", err)
+	}
+	if q.invalidateRefreshTokenByIdStmt, err = db.PrepareContext(ctx, invalidateRefreshTokenById); err != nil {
+		return nil, fmt.Errorf("error preparing query InvalidateRefreshTokenById: %w", err)
+	}
 	return &q, nil
 }
 
@@ -75,6 +84,21 @@ func (q *Queries) Close() error {
 	if q.insertRefreshTokenStmt != nil {
 		if cerr := q.insertRefreshTokenStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing insertRefreshTokenStmt: %w", cerr)
+		}
+	}
+	if q.invalidateAllTokensForUserStmt != nil {
+		if cerr := q.invalidateAllTokensForUserStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing invalidateAllTokensForUserStmt: %w", cerr)
+		}
+	}
+	if q.invalidateRefreshTokenStmt != nil {
+		if cerr := q.invalidateRefreshTokenStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing invalidateRefreshTokenStmt: %w", cerr)
+		}
+	}
+	if q.invalidateRefreshTokenByIdStmt != nil {
+		if cerr := q.invalidateRefreshTokenByIdStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing invalidateRefreshTokenByIdStmt: %w", cerr)
 		}
 	}
 	return err
@@ -114,25 +138,31 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 }
 
 type Queries struct {
-	db                      DBTX
-	tx                      *sql.Tx
-	createUserStmt          *sql.Stmt
-	getRefreshTokenStmt     *sql.Stmt
-	getRefreshTokenByIdStmt *sql.Stmt
-	getUserByEmailStmt      *sql.Stmt
-	getUserByIdStmt         *sql.Stmt
-	insertRefreshTokenStmt  *sql.Stmt
+	db                             DBTX
+	tx                             *sql.Tx
+	createUserStmt                 *sql.Stmt
+	getRefreshTokenStmt            *sql.Stmt
+	getRefreshTokenByIdStmt        *sql.Stmt
+	getUserByEmailStmt             *sql.Stmt
+	getUserByIdStmt                *sql.Stmt
+	insertRefreshTokenStmt         *sql.Stmt
+	invalidateAllTokensForUserStmt *sql.Stmt
+	invalidateRefreshTokenStmt     *sql.Stmt
+	invalidateRefreshTokenByIdStmt *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
-		db:                      tx,
-		tx:                      tx,
-		createUserStmt:          q.createUserStmt,
-		getRefreshTokenStmt:     q.getRefreshTokenStmt,
-		getRefreshTokenByIdStmt: q.getRefreshTokenByIdStmt,
-		getUserByEmailStmt:      q.getUserByEmailStmt,
-		getUserByIdStmt:         q.getUserByIdStmt,
-		insertRefreshTokenStmt:  q.insertRefreshTokenStmt,
+		db:                             tx,
+		tx:                             tx,
+		createUserStmt:                 q.createUserStmt,
+		getRefreshTokenStmt:            q.getRefreshTokenStmt,
+		getRefreshTokenByIdStmt:        q.getRefreshTokenByIdStmt,
+		getUserByEmailStmt:             q.getUserByEmailStmt,
+		getUserByIdStmt:                q.getUserByIdStmt,
+		insertRefreshTokenStmt:         q.insertRefreshTokenStmt,
+		invalidateAllTokensForUserStmt: q.invalidateAllTokensForUserStmt,
+		invalidateRefreshTokenStmt:     q.invalidateRefreshTokenStmt,
+		invalidateRefreshTokenByIdStmt: q.invalidateRefreshTokenByIdStmt,
 	}
 }

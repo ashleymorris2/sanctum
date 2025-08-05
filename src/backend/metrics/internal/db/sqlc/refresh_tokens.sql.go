@@ -79,3 +79,36 @@ func (q *Queries) InsertRefreshToken(ctx context.Context, arg InsertRefreshToken
 	err := row.Scan(&id)
 	return id, err
 }
+
+const invalidateAllTokensForUser = `-- name: InvalidateAllTokensForUser :exec
+UPDATE refresh_tokens
+SET revoked = true
+WHERE user_id = $1 AND revoked = false
+`
+
+func (q *Queries) InvalidateAllTokensForUser(ctx context.Context, userID uuid.UUID) error {
+	_, err := q.exec(ctx, q.invalidateAllTokensForUserStmt, invalidateAllTokensForUser, userID)
+	return err
+}
+
+const invalidateRefreshToken = `-- name: InvalidateRefreshToken :exec
+UPDATE refresh_tokens
+SET revoked = true
+WHERE token = $1
+`
+
+func (q *Queries) InvalidateRefreshToken(ctx context.Context, token string) error {
+	_, err := q.exec(ctx, q.invalidateRefreshTokenStmt, invalidateRefreshToken, token)
+	return err
+}
+
+const invalidateRefreshTokenById = `-- name: InvalidateRefreshTokenById :exec
+UPDATE refresh_tokens
+SET revoked = true
+WHERE id = $1
+`
+
+func (q *Queries) InvalidateRefreshTokenById(ctx context.Context, id uuid.UUID) error {
+	_, err := q.exec(ctx, q.invalidateRefreshTokenByIdStmt, invalidateRefreshTokenById, id)
+	return err
+}

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
+	"log"
 	"metrics/internal/db/repositories"
 	"metrics/internal/db/sqlc"
 
@@ -108,23 +109,7 @@ func (cs *CredentialService) Register(ctx context.Context, email, password strin
 		return nil, err
 	}
 
-	jwtToken, err := generateJWT(user.ID, cs.authTokenTTL, cs.jwtSecret)
-	if err != nil {
-		return nil, err
-	}
-
-	refreshToken, err := generateRefreshToken()
-	if err != nil {
-		//todo log
-		return nil, ErrRefreshTokenGeneration
-	}
-
-	return &CredentialAuthResult{
-		UserID:       user.ID.String(),
-		JWTToken:     jwtToken,
-		RefreshToken: refreshToken,
-		Email:        user.Email,
-	}, nil
+	return cs.issueTokenPair(ctx, user, nil)
 }
 
 func (cs *CredentialService) Authenticate(ctx context.Context, email, password string) (*CredentialAuthResult, error) {
@@ -142,33 +127,10 @@ func (cs *CredentialService) Authenticate(ctx context.Context, email, password s
 		return nil, ErrAuthFailure
 	}
 
-	jwtToken, err := generateJWT(user.ID, cs.authTokenTTL, cs.jwtSecret)
-	if err != nil {
-		//todo log
-		return nil, ErrJwtTokenGeneration
-	}
-
-	refreshToken, err := generateRefreshToken()
-	if err != nil {
-		//todo log
-		return nil, ErrRefreshTokenGeneration
-	}
-
-	err = cs.refreshTokenRepo.InsertRefreshToken(ctx, refreshToken, user.ID)
-	if err != nil {
-		return nil, fmt.Errorf("%s: %v", ErrDatabaseFailure, err)
-	}
-
-	return &CredentialAuthResult{
-		UserID:       user.ID.String(),
-		JWTToken:     jwtToken,
-		RefreshToken: refreshToken,
-		Email:        user.Email,
-	}, nil
+	return cs.issueTokenPair(ctx, user, nil)
 }
 
 func (cs *CredentialService) ValidateJwtToken(jwtToken model.JWTToken) (jwt.MapClaims, error) {
-
 	// Parse the token
 	token, err := jwt.Parse(jwtToken.String(), func(token *jwt.Token) (interface{}, error) {
 		// Validate the signing method
@@ -193,40 +155,24 @@ func (cs *CredentialService) ValidateJwtToken(jwtToken model.JWTToken) (jwt.MapC
 	return nil, ErrInvalidJwtToken
 }
 
-func (cs *CredentialService) RefreshJwtToken(refreshToken model.RefreshToken) (model.JWTToken, error) {
-	token, err := cs.ValidateRefreshToken(refreshToken)
+func (cs *CredentialService) RefreshJwtToken(ctx context.Context, refreshToken model.RefreshToken) (*CredentialAuthResult, error) {
+	token, err := cs.validateRefreshToken(ctx, refreshToken)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	// Get the user
-	user, err := cs.queries.GetUserById(context.Background(), token.UserID)
+	user, err := cs.queries.GetUserById(ctx, token.UserID)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	// Generate a new access token
-	jwtToken, err := generateJWT(user.ID, cs.authTokenTTL, cs.jwtSecret)
-	if err != nil {
-		return "", err
-	}
-
-	newRefreshToken, err := generateRefreshToken()
-	if err != nil {
-		return "", err
-	}
-
-	err = cs.refreshTokenRepo.InsertRefreshToken(ctx, newRefreshToken, user.ID)
-	if err != nil {
-		return nil, fmt.Errorf("%s: %v", ErrDatabaseFailure, err)
-	}
-
-	return jwtToken, nil
+	return cs.issueTokenPair(ctx, user, &refreshToken)
 }
 
-func (cs *CredentialService) ValidateRefreshToken(refreshToken model.RefreshToken) (*sqlc.RefreshToken, error) {
+func (cs *CredentialService) validateRefreshToken(ctx context.Context, refreshToken model.RefreshToken) (*sqlc.RefreshToken, error) {
 	// Retrieve the refresh token
-	token, err := cs.refreshTokenRepo.GetRefreshToken(context.Background(), refreshToken)
+	token, err := cs.refreshTokenRepo.GetRefreshToken(ctx, refreshToken)
 	if err != nil {
 		return nil, ErrInvalidRefreshToken
 	}
@@ -246,4 +192,35 @@ func (cs *CredentialService) ValidateRefreshToken(refreshToken model.RefreshToke
 	}
 
 	return token, nil
+}
+
+func (cs *CredentialService) issueTokenPair(ctx context.Context, user sqlc.User, refreshToken *model.RefreshToken) (*CredentialAuthResult, error) {
+	jwtToken, err := generateJWT(user.ID, cs.authTokenTTL, cs.jwtSecret)
+	if err != nil {
+		return nil, ErrJwtTokenGeneration
+	}
+
+	newRefreshToken, err := generateRefreshToken()
+	if err != nil {
+		return nil, ErrRefreshTokenGeneration
+	}
+
+	if err := cs.refreshTokenRepo.InsertRefreshToken(ctx, newRefreshToken, user.ID, cs.refreshTokenTTL); err != nil {
+		return nil, fmt.Errorf("%s: %v", ErrDatabaseFailure, err)
+	}
+
+	if refreshToken != nil {
+		err = cs.refreshTokenRepo.InvalidateRefreshToken(*refreshToken)
+		if err != nil {
+			// Log the error but don't fail the operation
+			log.Printf("Failed to invalidate old refresh token: %v", err)
+		}
+	}
+
+	return &CredentialAuthResult{
+		UserID:       user.ID.String(),
+		JWTToken:     jwtToken,
+		RefreshToken: newRefreshToken,
+		Email:        user.Email,
+	}, nil
 }

@@ -46,3 +46,12 @@ func (r *RefreshTokenRepository) GetRefreshToken(ctx context.Context, refreshTok
 
 	return &token, nil
 }
+
+func (r *RefreshTokenRepository) InvalidateRefreshToken(token model.RefreshToken) error {
+	err := r.db.InvalidateRefreshTokenById(context.Background(), token.ID())
+	if err != nil {
+		return errors.New("error invalidating token")
+	}
+
+	return nil
+}
