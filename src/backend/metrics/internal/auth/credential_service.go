@@ -41,16 +41,24 @@ type CredentialService struct {
 	queries          *sqlc.Queries
 	refreshTokenRepo repositories.RefreshTokenRepository
 	jwtSecret        []byte
-	jwtTokenTTL      time.Duration
+	authTokenTTL     time.Duration
+	refreshTokenTTL  time.Duration
 }
 
 // Option modifies the configuration of a CredentialService by applying custom settings through functional options.
 type Option func(*CredentialService)
 
-// WithTokenTimeout sets the token expiration timeout to the specified duration in a CredentialService instance.
-func WithTokenTimeout(d time.Duration) Option {
+// WithAuthTokenTimeout sets the auth token expiration timeout to the specified duration in a CredentialService instance.
+func WithAuthTokenTimeout(d time.Duration) Option {
 	return func(p *CredentialService) {
-		p.jwtTokenTTL = d
+		p.authTokenTTL = d
+	}
+}
+
+// WithRefreshTokenTimeout sets the refresh token expiration timeout to the specified duration in a CredentialService instance.
+func WithRefreshTokenTimeout(d time.Duration) Option {
+	return func(p *CredentialService) {
+		p.refreshTokenTTL = d
 	}
 }
 
@@ -65,14 +73,15 @@ func WithTokenTimeout(d time.Duration) Option {
 //	provider := auth.ByCredentials(
 //	    queries,
 //	    []byte("your-jwt-secret"),
-//	    auth.WithTokenTimeout(24 * time.Hour),
+//	    auth.WithAuthTokenTimeout(24 * time.Hour),
 //	)
 func ByCredentials(queries *sqlc.Queries, refreshTokenRepo repositories.RefreshTokenRepository, jwtSecret []byte, opts ...Option) *CredentialService {
 	p := &CredentialService{
 		queries:          queries,
 		refreshTokenRepo: refreshTokenRepo,
 		jwtSecret:        jwtSecret,
-		jwtTokenTTL:      15 * time.Minute,
+		authTokenTTL:     15 * time.Minute,
+		refreshTokenTTL:  28 * 24 * time.Hour,
 	}
 	for _, opt := range opts {
 		opt(p)
@@ -99,7 +108,7 @@ func (cs *CredentialService) Register(ctx context.Context, email, password strin
 		return nil, err
 	}
 
-	jwtToken, err := generateJWT(user.ID, cs.jwtTokenTTL, cs.jwtSecret)
+	jwtToken, err := generateJWT(user.ID, cs.authTokenTTL, cs.jwtSecret)
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +142,7 @@ func (cs *CredentialService) Authenticate(ctx context.Context, email, password s
 		return nil, ErrAuthFailure
 	}
 
-	jwtToken, err := generateJWT(user.ID, cs.jwtTokenTTL, cs.jwtSecret)
+	jwtToken, err := generateJWT(user.ID, cs.authTokenTTL, cs.jwtSecret)
 	if err != nil {
 		//todo log
 		return nil, ErrJwtTokenGeneration
@@ -145,7 +154,7 @@ func (cs *CredentialService) Authenticate(ctx context.Context, email, password s
 		return nil, ErrRefreshTokenGeneration
 	}
 
-	err = cs.refreshTokenRepo.InsertRefreshToken(ctx, refreshToken, user.ID, cs.jwtTokenTTL)
+	err = cs.refreshTokenRepo.InsertRefreshToken(ctx, refreshToken, user.ID)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %v", ErrDatabaseFailure, err)
 	}
@@ -197,9 +206,19 @@ func (cs *CredentialService) RefreshJwtToken(refreshToken model.RefreshToken) (m
 	}
 
 	// Generate a new access token
-	jwtToken, err := generateJWT(user.ID, cs.jwtTokenTTL, cs.jwtSecret)
+	jwtToken, err := generateJWT(user.ID, cs.authTokenTTL, cs.jwtSecret)
 	if err != nil {
 		return "", err
+	}
+
+	newRefreshToken, err := generateRefreshToken()
+	if err != nil {
+		return "", err
+	}
+
+	err = cs.refreshTokenRepo.InsertRefreshToken(ctx, newRefreshToken, user.ID)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %v", ErrDatabaseFailure, err)
 	}
 
 	return jwtToken, nil

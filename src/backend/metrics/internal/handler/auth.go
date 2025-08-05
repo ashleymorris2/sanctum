@@ -8,6 +8,7 @@ import (
 	"metrics/internal/model"
 	"metrics/internal/validators"
 	"net/http"
+	"time"
 )
 
 type Auth struct {
@@ -43,14 +44,23 @@ func (a *Auth) Login(c echo.Context) error {
 		}
 	}
 
+	c.SetCookie(&http.Cookie{
+		Name:     "refresh_token",
+		Value:    authResult.RefreshToken.Token(),
+		Path:     "/refresh", // only sent on /refresh route
+		HttpOnly: true,
+		Secure:   true, // only send over HTTPS
+		SameSite: http.SameSiteStrictMode,
+		MaxAge:   int(28 * 24 * time.Hour.Seconds()),
+	})
+
 	return c.JSON(http.StatusOK, map[string]string{
-		"token":        authResult.JWTToken.String(),
-		"refreshToken": authResult.RefreshToken.String(),
-		"userId":       authResult.UserID,
+		"auth_token": authResult.JWTToken.String(),
+		"userId":     authResult.UserID,
 	})
 }
 
-func (a *Auth) Verify(c echo.Context) error {
+func (a *Auth) VerifyAuthToken(c echo.Context) error {
 	token, err := auth.JwtTokenFromHeader(c.Request())
 	if err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, "Missing or invalid token")
@@ -75,4 +85,39 @@ func (a *Auth) Verify(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]string{
 		"id": sub,
 	})
+}
+
+func (a *Auth) RefreshAuthToken(c echo.Context) error {
+	var req dto.RefreshTokenRequest
+	if err := c.Bind(&req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid request")
+	}
+
+	if err := c.Validate(&req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	credentialService, ok := a.authProvider.(*auth.CredentialService)
+	if !ok {
+		//Not configured for credential auth
+		return echo.NewHTTPError(http.StatusInternalServerError, "`Internal server error`")
+	}
+
+	refreshToken, err := model.ParseRefreshToken(req.RefreshToken)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "`Invalid refresh token`")
+	}
+
+	authToken, err := credentialService.RefreshJwtToken(refreshToken)
+	if err != nil {
+		// Error handling...
+		return echo.NewHTTPError(http.StatusUnauthorized, "invalid token")
+	}
+
+	refreshToken, err = credentialService.Refresh
+
+	return c.JSON(http.StatusOK, dto.RefreshTokenResponse{
+		AuthToken: authToken.String(),
+	})
+
 }

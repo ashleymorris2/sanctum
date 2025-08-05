@@ -10,5 +10,6 @@ func RegisterAuthFor(g *echo.Group, provider auth.Provider) {
 	h := handler.NewAuth(provider)
 
 	g.POST("/login", h.Login)
-	g.POST("/verify", h.Verify)
+	g.POST("/verify", h.VerifyAuthToken)
+	g.POST("/refresh", h.RefreshAuthToken)
 }

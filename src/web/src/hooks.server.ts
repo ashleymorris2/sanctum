@@ -1,11 +1,12 @@
 import { redirect, type Handle } from '@sveltejs/kit';
-import { isProtectedRoute, verifyAuthToken, refreshAuthToken } from '$lib/server/auth';
+import { getRouteAccess } from '$lib/server/auth/routeAccess';
+import { verifyAuthToken, refreshAuthToken } from '$lib/server/auth/authTokens';
 
 export const handle: Handle = async ({ event, resolve }) => {
 	const authToken = event.cookies.get('auth');
 	const refreshToken = event.cookies.get('refresh_token');
 
-	if (isProtectedRoute(event.route.id ?? undefined)) {
+	if (getRouteAccess(event.route.id ?? undefined).requiresAuth) {
 		if (!authToken && !refreshToken) {
 			return redirect(302, '/login');
 		}
@@ -20,7 +21,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 		// Try refreshing if access token invalid or missing
 		if (refreshToken) {
-			const result = await refreshAuthToken(refresh);
+			const result = await refreshAuthToken(refreshToken);
 			if (result?.user && result?.token) {
 				event.cookies.set('auth', result.token, {
 					httpOnly: true,
