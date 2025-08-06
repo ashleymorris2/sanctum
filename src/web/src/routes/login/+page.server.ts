@@ -25,19 +25,29 @@ export const actions: Actions = {
 				body: JSON.stringify({ email, password })
 			});
 
+			const data = await res.json();
+
 			if (!res.ok) {
 				const errorData = await res.json();
 				return fail(res.status, errorData);
 			}
 
-			const { token } = await res.json();
+			const { authToken, refreshToken, refreshTokenTTL } = data;
 
-			cookies.set('auth', token, {
+			cookies.set('auth_token', authToken, {
 				path: '/',
 				httpOnly: true,
 				sameSite: 'lax',
 				secure: process.env.NODE_ENV === 'production',
 				maxAge: 60 * 60 * 24 * 7 // 7 days
+			});
+
+			cookies.set('refresh_token', refreshToken, {
+				path: '/',
+				httpOnly: true,
+				sameSite: 'lax',
+				secure: process.env.NODE_ENV === 'production',
+				maxAge: refreshTokenTTL // 7 days
 			});
 		} catch (err) {
 			console.error('Login error:', err);

@@ -83,8 +83,8 @@ func ByCredentials(queries *sqlc.Queries, refreshTokenRepo repositories.RefreshT
 		queries:          queries,
 		refreshTokenRepo: refreshTokenRepo,
 		jwtSecret:        jwtSecret,
-		authTokenTTL:     15 * time.Minute,
-		refreshTokenTTL:  28 * 24 * time.Hour,
+		authTokenTTL:     15 * time.Minute,    // 15 min
+		refreshTokenTTL:  28 * 24 * time.Hour, // 28 days
 	}
 	for _, opt := range opts {
 		opt(p)
@@ -222,9 +222,9 @@ func (cs *CredentialService) issueTokenPair(ctx context.Context, user sqlc.User,
 	return &CredentialAuthResult{
 		UserID:          user.ID.String(),
 		AuthToken:       jwtToken,
-		authTokenTTL:    cs.authTokenTTL,
+		AuthTokenTTL:    cs.authTokenTTL,
 		RefreshToken:    newRefreshToken,
-		refreshTokenTTL: cs.refreshTokenTTL,
+		RefreshTokenTTL: cs.refreshTokenTTL,
 		Email:           user.Email,
 	}, nil
 }

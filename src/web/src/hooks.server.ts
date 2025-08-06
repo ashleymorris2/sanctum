@@ -3,7 +3,7 @@ import { getRouteAccess } from '$lib/server/auth/routeAccess';
 import { verifyAuthToken, refreshAuthToken } from '$lib/server/auth/authTokens';
 
 export const handle: Handle = async ({ event, resolve }) => {
-	const authToken = event.cookies.get('auth');
+	const authToken = event.cookies.get('auth_token');
 	const refreshToken = event.cookies.get('refresh_token');
 
 	if (getRouteAccess(event.route.id ?? undefined).requiresAuth) {

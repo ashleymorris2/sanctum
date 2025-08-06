@@ -10,6 +10,8 @@ import (
 	"net/http"
 )
 
+const secureCookie = false
+
 type Auth struct {
 	authProvider auth.Provider
 }
@@ -46,16 +48,18 @@ func (a *Auth) Login(c echo.Context) error {
 	c.SetCookie(&http.Cookie{
 		Name:     "refresh_token",
 		Value:    authResult.RefreshToken.Token(),
-		Path:     "/refresh", // only sent on /refresh route
+		Path:     "/", // only sent on /refresh route
 		HttpOnly: true,
-		Secure:   true, // only send over HTTPS
-		SameSite: http.SameSiteStrictMode,
+		Secure:   secureCookie, // only send over HTTPS
+		SameSite: http.SameSiteNoneMode,
 		MaxAge:   int(authResult.RefreshTokenTTL.Seconds()),
 	})
 
-	return c.JSON(http.StatusOK, map[string]string{
-		"auth_token": authResult.AuthToken.String(),
-		"userId":     authResult.UserID,
+	return c.JSON(http.StatusOK, dto.LoginResponse{
+		AuthToken:       authResult.AuthToken.String(),
+		RefreshToken:    authResult.RefreshToken.Token(),
+		RefreshTokenTTL: authResult.RefreshTokenTTL.Seconds(),
+		UserId:          authResult.UserID,
 	})
 }
 
@@ -116,10 +120,10 @@ func (a *Auth) RefreshAuthToken(c echo.Context) error {
 	c.SetCookie(&http.Cookie{
 		Name:     "refresh_token",
 		Value:    tokenPair.RefreshToken.Token(),
-		Path:     "/refresh", // only sent on /refresh route
+		Path:     "/", // only sent on /refresh route
 		HttpOnly: true,
-		Secure:   true, // only send over HTTPS
-		SameSite: http.SameSiteStrictMode,
+		Secure:   secureCookie, // only send over HTTPS
+		SameSite: http.SameSiteNoneMode,
 		MaxAge:   int(tokenPair.RefreshTokenTTL.Seconds()),
 	})
 
