@@ -1,25 +1,22 @@
 import type { Actions } from './$types';
-import { fail, redirect } from '@sveltejs/kit';
+import { fail } from '@sveltejs/kit';
 import { AUTH_API_BASE } from '$env/static/private';
+import { setRefreshTokenCookie } from '$lib/server/auth/setCookie';
 
 export const actions: Actions = {
 	default: async ({ request, cookies }) => {
 		const formData = await request.formData();
 		const email = formData.get('email')?.toString().trim();
 		const password = formData.get('password')?.toString();
-		const formErrors: { [key: string]: string } = {};
 
-		// Validate presence
+		if (!email && !password) {
+			return fail(400, { error: 'An Email and Password are required' });
+		}
 		if (!email) {
-			formErrors.email = 'Email is required';
+			return fail(400, { email: 'An email is required' });
 		}
-
 		if (!password) {
-			formErrors.password = 'Password is required';
-		}
-
-		if (Object.keys(formErrors).length > 0) {
-			return fail(400, { formErrors });
+			return fail(400, { password: 'A password is required' });
 		}
 
 		try {
@@ -29,28 +26,22 @@ export const actions: Actions = {
 				body: JSON.stringify({ email, password })
 			});
 
+			const data = await res.json();
 			if (!res.ok) {
-				const errorData = await res.json();
-
-				const errorMessage = Array.isArray(errorData) ? errorData[1] : errorData.message;
-				return fail(res.status, { errorMessage });
+				return fail(res.status, data);
 			}
 
-			const { token } = await res.json();
+			const { authToken, refreshToken, refreshTokenTTL } = data;
 
-			cookies.set('auth', token, {
-				path: '/',
-				httpOnly: true,
-				sameSite: 'lax',
-				secure: process.env.NODE_ENV === 'production',
-				maxAge: 60 * 60 * 24 * 7 // 7 days
-			});
-		} catch (err) {
-			console.error('Login error:', err);
+			setRefreshTokenCookie(cookies, refreshToken, refreshTokenTTL);
+
+			return {
+				success: true,
+				authToken,
+				location: '/dashboard'
+			};
+		} catch {
 			return fail(500, { error: 'Server error during login' });
 		}
-
-		// Redirect to dashboard
-		return redirect(302, '/dashboard');
 	}
 };
