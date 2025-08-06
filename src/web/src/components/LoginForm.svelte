@@ -1,48 +1,52 @@
 <script lang="ts">
     import {enhance, applyAction} from '$app/forms';
+    import {authToken} from '$lib/stores/tokenStore';
     import {goto} from '$app/navigation';
 
     let email = $state('');
     let password = $state('');
 
-    const clientErrors = $state({email: '', password: '', error: '', message: ''});
+    const validationErrors = $state({
+        email: '',
+        password: '',
+        error: '',
+        message: ''
+    });
 
-    const errors = $derived.by(() => ({
-        email: clientErrors.email,
-        password: clientErrors.password,
-        error: clientErrors.error,
-        message: clientErrors.message
-    }));
+    const errorMessage = $derived.by(() =>
+        validationErrors.email ||
+        validationErrors.password ||
+        validationErrors.error ||
+        validationErrors.message ||
+        ''
+    );
 
     const validateEmail = (email: string, cancel: () => void): boolean => {
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
             cancel();
-            clientErrors.email = 'Please enter a valid email';
+            validationErrors.email = 'Please enter a valid email';
             return false;
         }
-
-        clientErrors.email = '';
-        clientErrors.message = '';
+        validationErrors.email = '';
+        validationErrors.message = '';
         return true;
     };
 
     const onLoginEnhance = ({cancel}) => {
-
         if (!validateEmail(email, cancel)) {
             return;
         }
 
         return async ({result, update}) => {
             await update({reset: false, invalidateAll: false});
-
-            if (result.type === 'redirect') {
-                // SvelteKit might have redirected or returned success; handle redirection here
-                await goto(result.location);
+            if (result.type === 'success') {
+                authToken.set(result.data.authToken);
+                await goto(result.data.location);
             } else {
-                if (result.data.email) clientErrors.email = result.data.email;
-                if (result.data.password) clientErrors.password = result.data.password;
-                if (result.data.error) clientErrors.error = result.data.error;
-                if (result.data.message) clientErrors.message = result.data.message;
+                if (result.data.email) validationErrors.email = result.data.email;
+                if (result.data.password) validationErrors.password = result.data.password;
+                if (result.data.error) validationErrors.error = result.data.error;
+                if (result.data.message) validationErrors.message = result.data.message;
 
                 await applyAction(result);
             }
@@ -57,14 +61,14 @@
     </div>
 
     <div class="min-h-[50px] mt-4">
-        {#if errors.email || errors.password || errors.error || errors.message}
+        {#if errorMessage}
             <div role="alert" class="alert alert-error">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none"
                      viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
-                <span>{errors.email || errors.password || errors.error || errors.message}</span>
+                <span>{errorMessage}</span>
             </div>
         {/if}
     </div>
@@ -85,13 +89,13 @@
                         autocomplete="email"
                         on:input={() =>{
                              if (validateEmail(email)) {
-                                clientErrors.email = '';
-                                clientErrors.message = '';
+                                validationErrors.email = '';
+                                validationErrors.message = '';
                             }
                         }}
                         required
                         class="input input-lg input-bordered w-full"
-                        class:input-error={!!errors.email || !!errors.message}
+                        class:input-error={!!validationErrors.email || !!validationErrors.message}
                 />
             </label>
             <label class="floating-label mt-4">
@@ -105,12 +109,12 @@
                         placeholder="Password"
                         autocomplete="current-password"
                         on:input={() =>{
-                            clientErrors.password = '';
-                            clientErrors.message = '';
+                            validationErrors.password = '';
+                            validationErrors.message = '';
                         }}
                         required
                         class="input input-lg input-bordered w-full"
-                        class:input-error={!!errors.password || errors.message}
+                        class:input-error={!!validationErrors.password || !!validationErrors.message}
                 />
             </label>
 

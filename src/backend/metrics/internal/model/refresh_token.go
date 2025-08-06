@@ -46,7 +46,7 @@ func (t RefreshToken) String() string {
 	return string(t)
 }
 
-// Hashed returns the string representation of the RefreshToken but hashed
+// Hashed returns the string representation of the RefreshToken after the dot but hashed
 func (t RefreshToken) Hashed() string {
 	hash := sha256.Sum256([]byte(t.Token()))
 	return base64.URLEncoding.EncodeToString(hash[:])

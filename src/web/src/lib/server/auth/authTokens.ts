@@ -17,9 +17,10 @@ export async function refreshAuthToken(refreshToken: string) {
 	try {
 		const res = await fetch(`${AUTH_API_BASE}/api/refresh`, {
 			method: 'POST',
-			headers: { Cookie: `refresh_token=${refreshToken}` }, // Note: cookies only work client-side
+			headers: { Cookie: `refresh_token=${refreshToken}` },
 			credentials: 'include'
 		});
+
 		if (!res.ok) return null;
 
 		const { token, user } = await res.json();

@@ -45,19 +45,9 @@ func (a *Auth) Login(c echo.Context) error {
 		}
 	}
 
-	c.SetCookie(&http.Cookie{
-		Name:     "refresh_token",
-		Value:    authResult.RefreshToken.Token(),
-		Path:     "/", // only sent on /refresh route
-		HttpOnly: true,
-		Secure:   secureCookie, // only send over HTTPS
-		SameSite: http.SameSiteNoneMode,
-		MaxAge:   int(authResult.RefreshTokenTTL.Seconds()),
-	})
-
 	return c.JSON(http.StatusOK, dto.LoginResponse{
 		AuthToken:       authResult.AuthToken.String(),
-		RefreshToken:    authResult.RefreshToken.Token(),
+		RefreshToken:    authResult.RefreshToken.String(),
 		RefreshTokenTTL: authResult.RefreshTokenTTL.Seconds(),
 		UserId:          authResult.UserID,
 	})
@@ -75,7 +65,7 @@ func (a *Auth) VerifyAuthToken(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "`Internal server error`")
 	}
 
-	claims, err := credentialService.ValidateJwtToken(model.JWTToken(token))
+	claims, err := credentialService.ValidateJwtToken(token)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, "Invalid or expired token")
 	}
@@ -91,13 +81,10 @@ func (a *Auth) VerifyAuthToken(c echo.Context) error {
 }
 
 func (a *Auth) RefreshAuthToken(c echo.Context) error {
-	var req dto.RefreshTokenRequest
-	if err := c.Bind(&req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid request")
-	}
 
-	if err := c.Validate(&req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	cookie, err := c.Cookie("refresh_token")
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, "Invalid refresh token")
 	}
 
 	credentialService, ok := a.authProvider.(*auth.CredentialService)
@@ -106,28 +93,15 @@ func (a *Auth) RefreshAuthToken(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Internal server error")
 	}
 
-	refreshToken, err := model.ParseRefreshToken(req.RefreshToken)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusUnauthorized, "Invalid refresh token")
-	}
-
-	tokenPair, err := credentialService.RefreshJwtToken(c.Request().Context(), refreshToken)
+	tokenPair, err := credentialService.RefreshJwtToken(c.Request().Context(), model.RefreshToken(cookie.Value))
 	if err != nil {
 		// Error handling...
 		return echo.NewHTTPError(http.StatusUnauthorized, "invalid token")
 	}
 
-	c.SetCookie(&http.Cookie{
-		Name:     "refresh_token",
-		Value:    tokenPair.RefreshToken.Token(),
-		Path:     "/", // only sent on /refresh route
-		HttpOnly: true,
-		Secure:   secureCookie, // only send over HTTPS
-		SameSite: http.SameSiteNoneMode,
-		MaxAge:   int(tokenPair.RefreshTokenTTL.Seconds()),
-	})
-
 	return c.JSON(http.StatusOK, dto.RefreshTokenResponse{
-		AuthToken: tokenPair.AuthToken.String(),
+		AuthToken:       tokenPair.AuthToken.String(),
+		RefreshToken:    tokenPair.RefreshToken.String(),
+		RefreshTokenTTL: tokenPair.RefreshTokenTTL.Seconds(),
 	})
 }

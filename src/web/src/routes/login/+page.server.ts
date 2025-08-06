@@ -28,19 +28,10 @@ export const actions: Actions = {
 			const data = await res.json();
 
 			if (!res.ok) {
-				const errorData = await res.json();
-				return fail(res.status, errorData);
+				return fail(res.status, data);
 			}
 
 			const { authToken, refreshToken, refreshTokenTTL } = data;
-
-			cookies.set('auth_token', authToken, {
-				path: '/',
-				httpOnly: true,
-				sameSite: 'lax',
-				secure: process.env.NODE_ENV === 'production',
-				maxAge: 60 * 60 * 24 * 7 // 7 days
-			});
 
 			cookies.set('refresh_token', refreshToken, {
 				path: '/',
@@ -49,12 +40,14 @@ export const actions: Actions = {
 				secure: process.env.NODE_ENV === 'production',
 				maxAge: refreshTokenTTL // 7 days
 			});
-		} catch (err) {
-			console.error('Login error:', err);
+
+			return {
+				success: true,
+				authToken,
+				location: '/dashboard'
+			};
+		} catch {
 			return fail(500, { error: 'Server error during login' });
 		}
-
-		// Redirect to dashboard
-		return redirect(302, '/dashboard');
 	}
 };

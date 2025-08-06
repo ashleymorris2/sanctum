@@ -212,7 +212,7 @@ func (cs *CredentialService) issueTokenPair(ctx context.Context, user sqlc.User,
 	}
 
 	if refreshToken != nil {
-		err = cs.refreshTokenRepo.InvalidateRefreshToken(*refreshToken)
+		err = cs.refreshTokenRepo.InvalidateRefreshToken(ctx, *refreshToken)
 		if err != nil {
 			// Log the error but don't fail the operation
 			log.Printf("Failed to invalidate old refresh token: %v", err)
