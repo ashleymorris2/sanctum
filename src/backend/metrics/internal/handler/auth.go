@@ -100,8 +100,7 @@ func (a *Auth) RefreshAuthToken(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, dto.RefreshTokenResponse{
-		AuthToken:       tokenPair.AuthToken.String(),
-		RefreshToken:    tokenPair.RefreshToken.String(),
-		RefreshTokenTTL: tokenPair.RefreshTokenTTL.Seconds(),
+		AuthToken: tokenPair.AuthToken.String(),
+		UserId:    tokenPair.UserID,
 	})
 }

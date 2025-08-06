@@ -20,11 +20,9 @@ export async function refreshAuthToken(refreshToken: string) {
 			headers: { Cookie: `refresh_token=${refreshToken}` },
 			credentials: 'include'
 		});
-
 		if (!res.ok) return null;
-
-		const { token, user } = await res.json();
-		return { token, user };
+		const { authToken, userId } = await res.json();
+		return { authToken, userId };
 	} catch {
 		return null;
 	}

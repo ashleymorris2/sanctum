@@ -1,6 +1,7 @@
 import type { Actions } from './$types';
-import { fail, redirect } from '@sveltejs/kit';
+import { fail } from '@sveltejs/kit';
 import { AUTH_API_BASE } from '$env/static/private';
+import { setRefreshTokenCookie } from '$lib/server/auth/setCookie';
 
 export const actions: Actions = {
 	default: async ({ request, cookies }) => {
@@ -9,13 +10,13 @@ export const actions: Actions = {
 		const password = formData.get('password')?.toString();
 
 		if (!email && !password) {
-			return fail(400, { error: 'Email and Password is required' });
+			return fail(400, { error: 'An Email and Password are required' });
 		}
 		if (!email) {
-			return fail(400, { email: 'Email is required' });
+			return fail(400, { email: 'An email is required' });
 		}
 		if (!password) {
-			return fail(400, { password: 'Password is required' });
+			return fail(400, { password: 'A password is required' });
 		}
 
 		try {
@@ -26,20 +27,13 @@ export const actions: Actions = {
 			});
 
 			const data = await res.json();
-
 			if (!res.ok) {
 				return fail(res.status, data);
 			}
 
 			const { authToken, refreshToken, refreshTokenTTL } = data;
 
-			cookies.set('refresh_token', refreshToken, {
-				path: '/',
-				httpOnly: true,
-				sameSite: 'lax',
-				secure: process.env.NODE_ENV === 'production',
-				maxAge: refreshTokenTTL // 7 days
-			});
+			setRefreshTokenCookie(cookies, refreshToken, refreshTokenTTL);
 
 			return {
 				success: true,

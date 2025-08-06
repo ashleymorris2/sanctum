@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
-	"log"
 	"metrics/internal/db/repositories"
 	"metrics/internal/db/sqlc"
 
@@ -169,7 +168,19 @@ func (cs *CredentialService) RefreshJwtToken(ctx context.Context, refreshToken m
 		return nil, err
 	}
 
-	return cs.issueTokenPair(ctx, user, &refreshToken)
+	jwtToken, err := generateJWT(user.ID, cs.authTokenTTL, cs.jwtSecret)
+	if err != nil {
+		return nil, ErrJwtTokenGeneration
+	}
+
+	return &CredentialAuthResult{
+		UserID:          user.ID.String(),
+		AuthToken:       jwtToken,
+		AuthTokenTTL:    cs.authTokenTTL,
+		RefreshToken:    refreshToken,
+		RefreshTokenTTL: cs.refreshTokenTTL,
+		Email:           user.Email,
+	}, nil
 }
 
 func (cs *CredentialService) validateRefreshToken(ctx context.Context, refreshToken model.RefreshToken) (*sqlc.RefreshToken, error) {
@@ -209,14 +220,6 @@ func (cs *CredentialService) issueTokenPair(ctx context.Context, user sqlc.User,
 
 	if err := cs.refreshTokenRepo.InsertRefreshToken(ctx, newRefreshToken, user.ID, cs.refreshTokenTTL); err != nil {
 		return nil, fmt.Errorf("%s: %v", ErrDatabaseFailure, err)
-	}
-
-	if refreshToken != nil {
-		err = cs.refreshTokenRepo.InvalidateRefreshToken(ctx, *refreshToken)
-		if err != nil {
-			// Log the error but don't fail the operation
-			log.Printf("Failed to invalidate old refresh token: %v", err)
-		}
 	}
 
 	return &CredentialAuthResult{
