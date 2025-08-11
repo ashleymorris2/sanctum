@@ -40,4 +40,12 @@
     --noise: 1;
 }
 
+@layer utilities {
+    .menu :where(li > *:not(ul):not(.menu-title)).active-item,
+    .menu :where(li > *:not(ul):not(.menu-title))[aria-current="page"] {
+        @apply text-primary-content font-semibold bg-primary/20;
+    }
+
+}
+
 
