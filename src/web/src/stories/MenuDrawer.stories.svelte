@@ -5,6 +5,9 @@
     const {Story} = defineMeta({
         title: 'Navigation/MenuDrawer',
         component: MenuDrawer,
+        parameters: {
+            layout: 'fullscreen',
+        },
         args: {
             title: 'Sanctum',
             links: [

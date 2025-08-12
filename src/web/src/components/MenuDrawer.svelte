@@ -1,18 +1,23 @@
 <script lang="ts">
-    export let links: { label: string; href: string }[] = []; // Links to show in the MenuDrawer
-    export let pathname: string = '/'; // The current pages pathname
-    export let title: string = 'Navigation';
-
-    let { children } = $props();
+    const {
+        links = [],
+        pathname = '/',
+        title = 'Navigation',
+        content = undefined
+    } = $props<{
+        links?: { label: string; href: string; match?: 'exact' | 'section' }[];
+        pathname?: string;
+        title?: string;
+    }>();
 </script>
 
 <div class="drawer lg:drawer-open">
     <input id="menu-drawer" type="checkbox" class="drawer-toggle"/>
-    <div class="drawer-content flex flex-col items-center justify-center">
-        {#if children}
-            {@render children()}
+    <div class="drawer-content flex flex-col">
+        {#if content}
+            {@render content()}
         {:else}
-            <span>No content found</span>
+            <h1 class="text-xl font-bold">{title}</h1>
         {/if}
         <label for="menu-drawer" class="btn btn-primary drawer-button lg:hidden">
             Open drawer
@@ -20,7 +25,8 @@
     </div>
     <div class="drawer-side">
         <label for="menu-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
-        <ul class="menu bg-base-200 text-base-content min-h-full w-80 p-4">
+        <ul class="menu bg-base-100 text-base-content w-64 p-4">
+            <li class="text-xl font-bold pb-8">{title}</li>
             {#each links as link (link.href)}
                 <li>
                     <a href={link.href} class:active-item={pathname.startsWith(link.href)}>
