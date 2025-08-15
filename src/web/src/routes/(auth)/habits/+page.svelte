@@ -3,7 +3,7 @@
     const description = 'This is a placeholder page for development purposes.';
 </script>
 
-<div class="min-h-screen bg-gray-100 py-12 px-4 sm:px-6">
+<div class="min-h-screen bg-gray-100 pt-4">
     <div class="max-w-4xl mx-auto">
         <div class="bg-white rounded-lg shadow-md p-8">
             <h1 class="text-3xl font-bold text-gray-900 mb-4">{title}</h1>

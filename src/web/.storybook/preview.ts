@@ -14,15 +14,12 @@ const preview: Preview = {
 	decorators: [
 		withThemeByDataAttribute<SvelteRenderer>({
 			themes: {
-				light: '',
+				light: 'sanctum',
 				dark: 'dark',
-				cupcake: 'cupcake',
-				emerald: 'emerald',
 				sanctum: 'sanctum'
 			},
-			defaultTheme: 'light',
+			defaultTheme: 'light'
 			// attributeName: 'data-theme',
-
 		})
 	]
 };

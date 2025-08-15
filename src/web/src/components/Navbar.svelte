@@ -1,5 +1,5 @@
 <script lang="ts">
-    import {Plus} from '@lucide/svelte';
+    import AddHabitButton from "./AddHabitButton.svelte";
 
     const {
         title = 'Navigation'
@@ -13,9 +13,6 @@
         <p class="text-xl">{title}</p>
     </div>
     <div class="navbar-end">
-        <button class="btn lg:btn-sm btn-primary text-primary-content">
-            <Plus size="16"/>
-            Add habit
-        </button>
+        <AddHabitButton/>
     </div>
 </div>

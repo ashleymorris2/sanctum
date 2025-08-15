@@ -12,7 +12,7 @@
     </div>
 
     <!-- Left panel: only visible on medium and up -->
-    <div class="hidden md:flex w-1/2 bg-primary text-white items-center justify-center p-8">
+    <div class="hidden md:flex w-1/2 bg-primary text-primary-content items-center justify-center p-8">
         <div class="space-y-4 text-center">
             <h2 class="text-2xl font-bold">Lorem ipsum dolor sit amet consectetur adipiscing elit.</h2>
             <p class="text-sm"> Sit amet consectetur adipiscing elit quisque faucibus ex.
