@@ -6,45 +6,47 @@
     themes:  dark --prefersdark;
 }
 
+
 @plugin "daisyui/theme" {
     name: "sanctum";
     default: true;
     prefersdark: false;
     color-scheme: "light";
-    --color-base-100: oklch(98% 0.003 247.858);
-    --color-base-200: oklch(97% 0 0);
-    --color-base-300: oklch(92% 0 0);
-    --color-base-content: oklch(12% 0.042 264.695);
-    --color-primary: oklch(79% 0.209 151.711);
-    --color-primary-content: oklch(37% 0.077 168.94);
-    --color-secondary: oklch(70% 0.165 254.624);
-    --color-secondary-content: oklch(28% 0.091 267.935);
-    --color-accent: oklch(92% 0.084 155.995);
-    --color-accent-content: oklch(44% 0.119 151.328);
-    --color-neutral: oklch(92% 0.006 264.531);
-    --color-neutral-content: oklch(20% 0 0);
-    --color-info: oklch(74% 0.16 232.661);
-    --color-info-content: oklch(29% 0.066 243.157);
+    --color-base-100: oklch(98% 0.002 247.839);
+    --color-base-200: oklch(96% 0.003 264.542);
+    --color-base-300: oklch(92% 0.006 264.531);
+    --color-base-content: oklch(21% 0.034 264.665);
+    --color-primary: oklch(70% 0.14 182.503);
+    --color-primary-content: oklch(98% 0.014 180.72);
+    --color-secondary: oklch(79% 0.184 86.047);
+    --color-secondary-content: oklch(98% 0.026 102.212);
+    --color-accent: oklch(0% 0 0);
+    --color-accent-content: oklch(100% 0 0);
+    --color-neutral: oklch(13% 0.028 261.692);
+    --color-neutral-content: oklch(98% 0.002 247.839);
+    --color-info: oklch(71% 0.143 215.221);
+    --color-info-content: oklch(98% 0.019 200.873);
     --color-success: oklch(72% 0.219 149.579);
-    --color-success-content: oklch(26% 0.051 172.552);
-    --color-warning: oklch(76% 0.188 70.08);
-    --color-warning-content: oklch(12% 0.042 264.695);
+    --color-success-content: oklch(98% 0.018 155.826);
+    --color-warning: oklch(70% 0.213 47.604);
+    --color-warning-content: oklch(98% 0.016 73.684);
     --color-error: oklch(63% 0.237 25.331);
-    --color-error-content: oklch(25% 0.092 26.042);
-    --radius-selector: 0.5rem;
+    --color-error-content: oklch(97% 0.013 17.38);
+    --radius-selector: 1rem;
     --radius-field: 0.5rem;
-    --radius-box: 1rem;
-    --size-selector: 0.21875rem;
-    --size-field: 0.28125rem;
-    --border: 1.5px;
-    --depth: 1;
+    --radius-box: 0.5rem;
+    --size-selector: 0.25rem;
+    --size-field: 0.25rem;
+    --border: 1px;
+    --depth: 0;
     --noise: 1;
 }
+
 
 @layer utilities {
     .menu :where(li > *:not(ul):not(.menu-title)).active-item,
     .menu :where(li > *:not(ul):not(.menu-title))[aria-current="page"] {
-        @apply text-primary-content font-semibold bg-primary/20;
+        @apply text-[#007A6D] bg-primary/10 font-semibold;
     }
 
 }

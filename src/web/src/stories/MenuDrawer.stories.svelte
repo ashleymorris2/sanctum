@@ -3,7 +3,7 @@
     import MenuDrawer from '../components/MenuDrawer.svelte';
 
     const {Story} = defineMeta({
-        title: 'Navigation/MenuDrawer',
+        title: 'Navigation/SideMenu',
         component: MenuDrawer,
         parameters: {
             layout: 'fullscreen',
@@ -19,9 +19,5 @@
 </script>
 
 <Story name="HabitsActive" args={{ pathname: '/habits' }} let:args>
-    <MenuDrawer {...args}/>
-</Story>
-
-<Story name="NoActive" args={{ pathname: '/' }} let:args>
     <MenuDrawer {...args}/>
 </Story>

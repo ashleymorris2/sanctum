@@ -19,10 +19,11 @@
 <dialog bind:this={modal} class="modal" on:close={onClose}>
     <div class="modal-box">
         <h3 class="text-lg font-bold">Create a habit</h3>
+        <div class="divider"></div>
         <div class="pt-2 w-full">
             <label class="floating-label">
                 <span>Name</span>
-                <input type="text" placeholder="Name" class="input input-md"/>
+                <input type="text" placeholder="Name" class="input w-full"/>
             </label>
         </div>
         <div class="modal-action">

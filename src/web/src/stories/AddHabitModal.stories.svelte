@@ -1,19 +1,19 @@
 <script module lang="ts">
     import {defineMeta} from '@storybook/addon-svelte-csf';
-    import Navbar from '../components/Navbar.svelte';
+    import AddHabitModal from "../components/AddHabitModal.svelte";
 
     const {Story} = defineMeta({
-        title: 'Navigation/Navbar',
-        component: Navbar,
+        title: 'Modals/AddHabitModal',
+        component: AddHabitModal,
         parameters: {
             layout: 'fullscreen',
         },
         args: {
-            title: 'Sanctum'
+            open: {control: 'boolean'}
         },
     });
 </script>
 
 <Story name="Default" let:args>
-    <Navbar {...args}/>
+    <AddHabitModal {...args}/>
 </Story>
