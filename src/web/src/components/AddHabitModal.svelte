@@ -1,7 +1,7 @@
 <script lang="ts">
 
     // runes: a bindable prop for open/close
-    let { open = $bindable(false) } = $props();
+    let {open = $bindable(false)} = $props();
 
     let modal: HTMLDialogElement | null = null;
 
@@ -17,19 +17,24 @@
 </script>
 
 <dialog bind:this={modal} class="modal" on:close={onClose}>
-    <div class="modal-box">
-        <h3 class="text-lg font-bold">Create a habit</h3>
-        <div class="divider"></div>
-        <div class="pt-2 w-full">
-            <label class="floating-label">
-                <span>Name</span>
-                <input type="text" placeholder="Name" class="input w-full"/>
-            </label>
+    <div class="modal-box p-0 shadow-xl rounded-1 ">
+        <div class="p-2">
+            <input
+                    placeholder="Habit name"
+                    class="input w-full text-lg font-semibold border-0 focus:outline-none focus:ring-0 bg-transparent"
+            />
+
         </div>
-        <div class="modal-action">
-            <form method="dialog">
-                <button class="btn">Close</button>
-            </form>
+
+        <div class="divider"></div>
+
+        <div class="modal-action p-2">
+            <div class="flex items-center gap-2">
+                <button class="btn btn-ghost" on:click={close}>Cancel</button>
+                <button class="btn btn-primary" on:click={close} disabled={true}>
+                    Add task
+                </button>
+            </div>
         </div>
     </div>
 </dialog>
