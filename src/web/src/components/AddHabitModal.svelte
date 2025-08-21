@@ -38,7 +38,7 @@
             <div class="pt-4 w-full flex items-center gap-2">
                 <label class="floating-label flex-grow">
                     <span>Target</span>
-                    <input type="text" placeholder="15" class="input w-16"/>
+                    <input type="text" placeholder="15" class="input-floating w-16"/>
                 </label>
                 <label class="floating-label flex-grow">
                     <span>Unit</span>

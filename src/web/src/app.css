@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 @plugin "daisyui" {
-    themes:  dark --prefersdark;
+    themes: dark --prefersdark;
 }
 
 
@@ -42,13 +42,33 @@
     --noise: 1;
 }
 
+@layer components {
+    .input-floating {
+        /*@apply rounded-md border border-base-300 bg-base-100 focus:border-primary focus:ring-0 outline-none;*/
+        @apply
+        input
+        rounded-md
+        border
+        border-base-300
+        bg-base-100
+        focus:border-base-content
+        text-[0.875rem]
+        focus:ring-0
+        focus:outline-none
+        p-2
+        outline-none;
+    }
+
+    /*.input-floating-label {*/
+    /*    @apply left-3 top-1 text-xs font-medium text-base-content/70;*/
+    /*}*/
+}
 
 @layer utilities {
     .menu :where(li > *:not(ul):not(.menu-title)).active-item,
     .menu :where(li > *:not(ul):not(.menu-title))[aria-current="page"] {
         @apply text-[#007A6D] bg-primary/10 font-semibold;
     }
-
 }
 
 
