@@ -1,9 +1,27 @@
 <script lang="ts">
+    import type {Habit} from '$lib/types/habit';
 
-    // runes: a bindable prop for open/close
-    let {open = $bindable(false)} = $props();
+    type Props = {
+        open?: boolean;
+        title?: string;
+        habit?: Habit | null;
+    };
 
     let modal: HTMLDialogElement | null = null;
+    let {
+        open = $bindable(false),
+        title = '' as string,
+        habit = null as Habit | null,
+    } = $props<Props>();
+
+    let name = $state('');
+    let target = $state('');
+    let unit = $state('');
+    let frequency = $state('');
+
+    function onClose() {
+        open = false;
+    }
 
     $effect(() => {
         if (!modal) return;
@@ -11,20 +29,30 @@
         if (!open && modal.open) modal.close();
     });
 
-    function onClose() {
-        open = false; // updates parent via bind:
-    }
+    $effect(() => {
+        if (habit) {
+            name = habit.name ?? '';
+            target = habit.target?.toString() ?? '';
+            unit = habit.unit ?? '';
+            frequency = habit.frequency ?? '';
+        } else {
+            name = '';
+            target = '';
+            unit = '';
+            frequency = '';
+        }
+    });
 </script>
 
 <dialog bind:this={modal} class="modal" on:close={onClose}>
     <div class="modal-box p-0">
-        <h3 class="text-lg font-bold p-6">Create a habit</h3>
+        <h3 class="text-lg font-bold p-6">{title}</h3>
         <div class="divider m-0 h-0"/>
         <div class="bg-base-200 p-6">
             <div class="w-full flex items-center gap-2">
                 <label class="floating-label flex-grow">
                     <span>Name</span>
-                    <input type="text" placeholder="Name" class="input w-full"/>
+                    <input type="text" bind:value={name} placeholder="Name" class="input w-full"/>
                 </label>
                 <button class="btn btn-square btn-primary btn-outline shrink-0">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" stroke-width="2.5"
@@ -38,15 +66,15 @@
             <div class="pt-4 w-full flex items-center gap-2">
                 <label class="floating-label flex-grow">
                     <span>Target</span>
-                    <input type="text" placeholder="15" class="input-floating w-16"/>
+                    <input type="text" bind:value={target} placeholder="15" class="input-simple w-16"/>
                 </label>
                 <label class="floating-label flex-grow">
                     <span>Unit</span>
-                    <input type="text" placeholder="reps" class="input w-full"/>
+                    <input type="text" bind:value={unit} placeholder="reps" class="input-simple w-full"/>
                 </label>
                 <label class="floating-label flex-grow">
                     <span>Frequency</span>
-                    <input type="text" placeholder="daily" class="input w-full"/>
+                    <input type="text" bind:value={frequency} placeholder="daily" class="input w-full"/>
                 </label>
                 <label class="floating-label flex-grow">
                     <span>Frequency</span>

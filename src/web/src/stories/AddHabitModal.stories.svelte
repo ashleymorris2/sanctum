@@ -9,11 +9,29 @@
             layout: 'fullscreen',
         },
         args: {
-            open: {control: 'boolean'}
+            open: true,
+            title: "Add Habit",
+            habit: null
         },
+        argTypes: {
+            open: {control: 'boolean'},
+            title: {control: 'text'},
+            habit: {control: 'object'}
+        }
     });
 </script>
 
-<Story name="Default" let:args>
+<Story name="Empty" let:args>
+    <AddHabitModal {...args}/>
+</Story>¬
+
+<Story name="Valid" let:args args={{habit: ({
+      id: '123',
+      name: 'Pushups',
+      target: 50,
+      unit: 'reps',
+      frequency: 'daily',
+      aggregation: 'average'
+    })}}>
     <AddHabitModal {...args}/>
 </Story>
