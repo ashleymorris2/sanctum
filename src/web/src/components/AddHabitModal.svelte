@@ -1,53 +1,27 @@
 <script lang="ts">
+    import Modal from './Modal.svelte'
     import type {Habit} from '$lib/types/habit';
 
-    type Props = {
-        open?: boolean;
-        title?: string;
-        habit?: Habit | null;
-    };
-
-    let modal: HTMLDialogElement | null = null;
     let {
         open = $bindable(false),
-        title = '' as string,
-        habit = null as Habit | null,
-    } = $props<Props>();
+        habit = null as Habit | null
+    } = $props<{ habit: Habit | null }>();
 
     let name = $state('');
     let target = $state('');
     let unit = $state('');
     let frequency = $state('');
 
-    function onClose() {
-        open = false;
-    }
-
     $effect(() => {
-        if (!modal) return;
-        if (open && !modal.open) modal.showModal();
-        if (!open && modal.open) modal.close();
-    });
-
-    $effect(() => {
-        if (habit) {
-            name = habit.name ?? '';
-            target = habit.target?.toString() ?? '';
-            unit = habit.unit ?? '';
-            frequency = habit.frequency ?? '';
-        } else {
-            name = '';
-            target = '';
-            unit = '';
-            frequency = '';
-        }
+        name = habit?.name ?? '';
+        target = habit?.target?.toString() ?? '';
+        unit = habit?.unit ?? '';
+        frequency = habit?.frequency ?? '';
     });
 </script>
 
-<dialog bind:this={modal} class="modal" on:close={onClose}>
-    <div class="modal-box p-0">
-        <h3 class="text-lg font-bold p-6">{title}</h3>
-        <div class="divider m-0 h-0"/>
+<Modal title="Add Habit" bind:open>
+    {#snippet content()}
         <div class="bg-base-200 p-6">
             <div class="w-full flex items-center gap-2">
                 <label class="floating-label flex-grow">
@@ -82,16 +56,5 @@
                 </label>
             </div>
         </div>
-
-        <div class="divider m-0 h-0"/>
-
-        <div class="modal-action mt-0 p-6">
-            <div class="flex items-center gap-2">
-                <button class="btn btn-ghost" on:click={close}>Cancel</button>
-                <button class="btn btn-primary" on:click={close} disabled={true}>
-                    Save
-                </button>
-            </div>
-        </div>
-    </div>
-</dialog>
+    {/snippet}
+</Modal>
