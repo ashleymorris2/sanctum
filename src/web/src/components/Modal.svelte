@@ -6,7 +6,8 @@
     };
 
     let {
-        open = $bindable(false),
+        open = false,
+        isValid = true,
         title = "",
         content = undefined
     } = $props<Props>();
@@ -31,7 +32,7 @@
         <div class="modal-action mt-0 p-6">
             <div class="flex items-center gap-2">
                 <button class="btn btn-ghost" on:click={close}>Cancel</button>
-                <button class="btn btn-primary" on:click={close} disabled={true}>Save</button>
+                <button class="btn btn-primary" on:click={close} disabled={!isValid}>Save</button>
             </div>
         </div>
     </div>

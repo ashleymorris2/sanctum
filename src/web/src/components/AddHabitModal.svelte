@@ -1,10 +1,12 @@
 <script lang="ts">
     import Modal from './Modal.svelte'
     import type {Habit} from '$lib/types/habit';
+    import {validateHabit} from "$lib/validation/Habit";
 
     let {
         open = $bindable(false),
-        habit = null as Habit | null
+        habit = null as Habit | null,
+        isValid = $bindable(false),
     } = $props<{ habit: Habit | null }>();
 
     let name = $state('');
@@ -18,15 +20,29 @@
         unit = habit?.unit ?? '';
         frequency = habit?.frequency ?? '';
     });
+
+    let valid = $derived.by(() => {
+        let input = {
+            id: habit?.id,
+            name,
+            target,
+            unit,
+            frequency,
+        };
+
+        let result =  validateHabit(input);
+        return result.isValid;
+    });
 </script>
 
-<Modal title="Add Habit" bind:open>
+<Modal title="Add Habit" bind:open bind:isValid={valid}>
     {#snippet content()}
         <div class="bg-base-200 p-6">
             <div class="w-full flex items-center gap-2">
                 <label class="floating-label flex-grow">
                     <span>Name</span>
-                    <input type="text" bind:value={name} placeholder="Name" class="input w-full"/>
+                    <input type="text" bind:value={name} placeholder="Name" class="input-simple w-full"
+                           aria-invalid="true"/>
                 </label>
                 <button class="btn btn-square btn-primary btn-outline shrink-0">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" stroke-width="2.5"
@@ -48,11 +64,11 @@
                 </label>
                 <label class="floating-label flex-grow">
                     <span>Frequency</span>
-                    <input type="text" bind:value={frequency} placeholder="daily" class="input w-full"/>
+                    <input type="text" bind:value={frequency} placeholder="daily" class="input-simple w-full"/>
                 </label>
                 <label class="floating-label flex-grow">
                     <span>Frequency</span>
-                    <input type="text" placeholder="average" class="input w-full"/>
+                    <input type="text" placeholder="average" class="input-simple w-full"/>
                 </label>
             </div>
         </div>
