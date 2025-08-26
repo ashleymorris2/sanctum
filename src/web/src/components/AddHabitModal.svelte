@@ -4,7 +4,7 @@
     import {validateHabit} from "$lib/habit/validation";
 
     let {
-        open = false,
+        open = $bindable(false),
         habit = null as Habit | null,
         onConfirm = function () {
         },

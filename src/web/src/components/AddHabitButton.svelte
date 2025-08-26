@@ -18,4 +18,4 @@
     Add habit
 </button>
 
-<AddHabitModal bind:open={open} onConfirm={onConfirm}/>
+<AddHabitModal bind:open onConfirm={onConfirm}/>

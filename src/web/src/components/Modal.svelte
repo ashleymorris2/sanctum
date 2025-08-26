@@ -1,6 +1,6 @@
 <script lang="ts">
     let {
-        open = false,
+        open = $bindable(false),
         title = "",
         content = undefined,
         isValid = $bindable(false),
