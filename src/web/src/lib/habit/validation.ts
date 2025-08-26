@@ -1,6 +1,7 @@
-import type { Habit } from '$lib/types/habit';
+import type { Habit } from '$lib/habit/types';
 
 export const FREQ = ['daily', 'weekly', 'monthly'] as const;
+
 export type Frequency = (typeof FREQ)[number];
 
 export type HabitErrors = Partial<{

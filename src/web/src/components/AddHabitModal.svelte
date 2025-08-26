@@ -1,13 +1,14 @@
 <script lang="ts">
     import Modal from './Modal.svelte'
-    import type {Habit} from '$lib/types/habit';
-    import {validateHabit} from "$lib/validation/Habit";
+    import type {Habit} from '$lib/habit/types';
+    import {validateHabit} from "$lib/habit/validation";
 
     let {
-        open = $bindable(false),
+        open = false,
         habit = null as Habit | null,
-        isValid = $bindable(false),
-    } = $props<{ habit: Habit | null }>();
+        onConfirm = function () {
+        },
+    } = $props();
 
     let name = $state('');
     let target = $state('');
@@ -21,21 +22,26 @@
         frequency = habit?.frequency ?? '';
     });
 
-    let valid = $derived.by(() => {
-        let input = {
-            id: habit?.id,
-            name,
-            target,
-            unit,
-            frequency,
-        };
+    const input = $derived.by(() => ({
+        id: habit?.id,
+        name,
+        target,
+        unit,
+        frequency
+    }));
 
-        let result =  validateHabit(input);
-        return result.isValid;
+    let habitIsValid = $derived.by(() => {
+        return validateHabit(input).isValid;
     });
+
+    function confirm() {
+        if (!habitIsValid) return;
+        onConfirm?.(input);
+        open = false;
+    }
 </script>
 
-<Modal title="Add Habit" bind:open bind:isValid={valid}>
+<Modal title="Add Habit" bind:open bind:isValid={habitIsValid} onConfirm={confirm}>
     {#snippet content()}
         <div class="bg-base-200 p-6">
             <div class="w-full flex items-center gap-2">
