@@ -17,7 +17,7 @@ export function validateHabit(input: Habit): { errors: HabitErrors; isValid: boo
 		errors.name = 'Name is required';
 	}
 
-	if (input.target === null || input.target < 0) {
+	if (input.target === null || input.target <= 0) {
 		errors.target = 'Target must be ≥ 0';
 	}
 
