@@ -53,7 +53,6 @@ main() {
     return $?
 }
 
-
 # Execute the main function
 main
 exit $?

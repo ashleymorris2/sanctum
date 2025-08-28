@@ -57,10 +57,12 @@
             </div>
 
             <div class="pt-4 w-full flex items-center gap-2">
-                <label class="floating-label flex-grow">
-                    <span>Target</span>
-                    <input type="number" bind:value={target} min="1" placeholder="15" class="input-simple w-16"/>
-                </label>
+                <div class="dropdown flex-grow">
+                    <div tabindex="0" role="button" class="btn">Target</div>
+                    <div tabindex="0" class="dropdown-content bg-base-100 rounded-box w-48">
+                        <input type="number" bind:value={target} min="1" placeholder="15" class="input-simple w-16"/>
+                    </div>
+                </div>
                 <label class="floating-label flex-grow">
                     <span>Unit</span>
                     <input type="text" bind:value={unit} placeholder="reps" class="input-simple w-full"/>
