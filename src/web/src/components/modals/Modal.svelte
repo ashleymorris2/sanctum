@@ -23,7 +23,7 @@
 </script>
 
 <dialog bind:this={modal} class="modal" on:close={onClose}>
-    <div class="modal-box w-6/12 max-w-5xl p-0">
+    <div class="modal-box p-0 overflow-visible">
         <h3 class="text-lg font-bold p-6">{title}</h3>
         <div class="divider m-0 h-0"/>
 
