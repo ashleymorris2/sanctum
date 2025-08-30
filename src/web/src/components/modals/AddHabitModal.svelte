@@ -46,24 +46,23 @@
     }
 </script>
 
-<Modal title="Add Habit" bind:open bind:isValid={habitIsValid} onConfirm={confirm}>
+<Modal bind:open bind:isValid={habitIsValid} onConfirm={confirm}>
     {#snippet content()}
-        <div class="bg-base-200 p-6">
-            <div class="w-full flex items-center gap-2">
-                <label class="floating-label flex-grow">
-                    <span>Name</span>
-                    <input type="text" bind:value={name} placeholder="Name" class="input-simple w-full"/>
-                </label>
+        <div class="p-4">
+            <div class="w-full ">
+                <input type="text" bind:value={name} placeholder="Name"
+                       class="input w-full text-xl font-semibold border-0 focus:outline-none focus:ring-0 bg-transparent"
+                />
             </div>
 
-            <div class="pt-4 w-full flex items-center gap-2">
+            <div class="pt-4 pl-2 w-full flex items-center gap-2">
                 <div class="dropdown flex-grow">
-                    <div tabindex="0" role="button" class="btn align-middle">
+                    <div tabindex="0" role="button" class="btn align-middle btn-sm btn-outline btn-neutral">
                         <CircleCheckBig class="w-4 h-4"/>
                         <span class="text-sm">{target} {unit} per {frequency === 'daily' ? 'day' : 'week'}</span>
                     </div>
                     <div tabindex="0" class="dropdown-content shadow-2xl">
-                        <div class="card bg-base-100 card-xs shadow-2xl">
+                        <div class="card bg-base-300 card-xs shadow-2xl">
                             <div class="card-body p-4 ">
                                 <div class="flex gap-4">
                                     <div class="flex flex-col w-24">
