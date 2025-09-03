@@ -3,6 +3,7 @@
     import type {Habit} from '$lib/habit/types';
     import {validateHabit} from "$lib/habit/validation";
     import TargetInputButton from "../button/TargetInputButton.svelte";
+    import HabitTypeButton from "../button/HabitTypeButton.svelte";
 
     let {
         open = $bindable(false),
@@ -12,12 +13,14 @@
     } = $props();
 
     let name = $state('');
+    let description = $state('');
     let target = $state('');
     let unit = $state('');
     let frequency = $state('');
 
     function resetFrom(h: Habit | null) {
         name = h?.name ?? '';
+        description = h?.description ?? '';
         target = h?.target?.toString() ?? '1';
         unit = h?.unit ?? 'time';
         frequency = h?.frequency ?? 'daily';
@@ -56,27 +59,19 @@
                        class="w-full text-xl font-semibold bg-transparent outline-none focus:ring-0 pl-2 pt-2 pb-2"
                 />
                 <input type="text"
-                       bind:value={name}
+                       bind:value={description}
                        placeholder="Description"
-                       class="w-full txt-sm font-semibold bg-transparent outline-none focus:ring-0 pl-2 pb-6"
+                       class="w-full txt-sm bg-transparent outline-none focus:ring-0 pl-2 pb-6"
                 />
             </div>
 
-            <div class="pt-4 pl-2 w-full flex items-center gap-2">
-                <TargetInputButton bind:frequency={frequency} bind:target={target} bind:unit={unit}/>
+            <div class="flex items-center gap-2 pt-4">
+                <HabitTypeButton/>
+                <div>
+                    <TargetInputButton bind:frequency={frequency} bind:target={target} bind:unit={unit}/>
+                </div>
             </div>
-            <!--                <label class="floating-label flex-grow">-->
-            <!--                    <span>Unit</span>-->
-            <!--                    <input type="text" bind:value={unit} placeholder="reps" class="input-simple w-full"/>-->
-            <!--                </label>-->
-            <!--                <label class="floating-label flex-grow">-->
-            <!--                    <span>Frequency</span>-->
-            <!--                    <input type="text" bind:value={frequency} placeholder="daily" class="input-simple w-full"/>-->
-            <!--                </label>-->
-            <!--                <label class="floating-label flex-grow">-->
-            <!--                    <span>Frequency</span>-->
-            <!--                    <input type="text" placeholder="average" class="input-simple w-full"/>-->
-            <!--                </label>-->
+
 
         </div>
     {/snippet}

@@ -6,8 +6,8 @@
         unit = $bindable(),
         frequency = $bindable()
     } = $props();
-
 </script>
+
 <div class="dropdown flex-grow">
     <div tabindex="0"
          role="button"
