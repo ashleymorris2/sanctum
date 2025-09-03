@@ -65,7 +65,7 @@
                 />
             </div>
 
-            <div class="flex items-center gap-2 pt-4">
+            <div class="flex items-center pt-4 gap-4">
                 <HabitTypeButton/>
                 <div>
                     <TargetInputButton bind:frequency={frequency} bind:target={target} bind:unit={unit}/>

@@ -8,7 +8,7 @@
     } = $props();
 </script>
 
-<div class="dropdown flex-grow">
+<div class="dropdown">
     <div tabindex="0"
          role="button"
          class="align-middle btn btn-sm btn-outline font-normal border-base-content/20 hover:bg-primary-content/5">
