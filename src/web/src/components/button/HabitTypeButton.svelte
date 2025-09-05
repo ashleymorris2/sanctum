@@ -18,7 +18,7 @@
         <span class="text-sm">{selected === 'target' ? 'Target' : 'Average'}</span>
     </div>
     <div tabindex="0" class="dropdown-content flex-g shadow-2xl w-104">
-        <div class="card bg-base-300 card-xs shadow-2xl">
+        <div class="card bg-base-100 card-xs shadow-2xl border border-base-content/15">
             <div class="card-body p-4 ">
                 <div class="flex gap-4">
                     {#each options as v, i (i)}
@@ -42,7 +42,7 @@
                                     </span>
                                     <br>
                                     <span class="opacity-70 text-sm">
-                                        {v === 'target' ? 'How many times/units?' : 'Keep an average over time'}
+                                        {v === 'target' ? 'How many times/units in a time period?' : 'Keep an average over a time period'}
                                     </span>
                                 </span>
                             </span>
