@@ -18,6 +18,8 @@
         <Hash class="w-4 h-4"/>
         <span class="text-sm">{selected === 'target' ? 'Target' : 'Average'}</span>
     </div>
+
+    <!--    Dropdown content -->
     <div tabindex="0" class="dropdown-content flex-g shadow-2xl w-96">
         <div class="card bg-base-100 card-xs shadow-2xl mt-1 border border-base-content/15">
             <div class="card-body p-2">
@@ -29,8 +31,8 @@
                                 aria-checked={selected === v}
                                 class={`rounded-sm p-2 text-left border transition cursor-pointer ${
                                     selected===v
-                                        ? 'border-primary ring-1 ring-primary/30 bg-base-100 hover:bg-base-content/15'
-                                        : 'border-transparent bg-base-100 hover:bg-base-content/15'}`
+                                        ? 'border-transparent bg-base-200 hover:bg-base-300'
+                                        : 'border-transparent bg-base-100 hover:bg-base-300'}`
                                     }
                                 on:click={() => select(v)}>
                             <span class="flex items-center justify-between w-full">
