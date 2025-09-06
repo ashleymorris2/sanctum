@@ -2,7 +2,9 @@
     import {Hash} from '@lucide/svelte';
     import {ChartNoAxesCombined} from '@lucide/svelte';
 
+    const iconSizeClass = "w-5 h-5";
     const options = ['average', 'target'];
+
     let selected = options[0];
 
     function select(v: typeof options[number]) {
@@ -17,23 +19,27 @@
         <Hash class="w-4 h-4"/>
         <span class="text-sm">{selected === 'target' ? 'Target' : 'Average'}</span>
     </div>
-    <div tabindex="0" class="dropdown-content flex-g shadow-2xl w-104">
-        <div class="card bg-base-100 card-xs shadow-2xl border border-base-content/15">
-            <div class="card-body p-4 ">
-                <div class="flex gap-4">
+    <div tabindex="0" class="dropdown-content flex-g shadow-2xl w-96">
+        <div class="card bg-base-100 card-xs shadow-2xl mt-1 border border-base-content/15">
+            <div class="card-body p-2">
+                <div class="flex flex-col gap-2">
                     {#each options as v, i (i)}
                         <button
                                 type="button"
                                 role="radio"
                                 aria-checked={selected === v}
-                                class={`rounded-2xl p-3 text-left border transition ${selected===v ? 'border-primary ring-2 ring-primary/30 bg-base-100' : 'border-base-300 bg-base-100 hover:bg-base-200'}`}
+                                class={`rounded-sm p-2 text-left border transition cursor-pointer ${
+                                    selected===v
+                                        ? 'border-primary ring-1 ring-primary/30 bg-base-100 hover:bg-base-content/15'
+                                        : 'border-transparent bg-base-100 hover:bg-base-content/15'}`
+                                    }
                                 on:click={() => select(v)}>
-                            <span class="flex items-center gap-3">
-                                <span class="text-xl opacity-40">
+                            <span class="flex items-center gap-1">
+                                <span class="opacity-25 mr-2">
                                    {#if v === 'target'}
-                                       <Hash/>
+                                       <Hash class={iconSizeClass}/>
                                    {:else}
-                                       <ChartNoAxesCombined/>
+                                       <ChartNoAxesCombined class={iconSizeClass}/>
                                    {/if}
                                 </span>
                                 <span>
@@ -41,7 +47,7 @@
                                         {v === 'target' ? 'Count' : 'Average'}
                                     </span>
                                     <br>
-                                    <span class="opacity-70 text-sm">
+                                    <span class="opacity-60 text-sm">
                                         {v === 'target' ? 'How many times/units in a time period?' : 'Keep an average over a time period'}
                                     </span>
                                 </span>
