@@ -1,6 +1,5 @@
 <script lang="ts">
-    import {Hash} from '@lucide/svelte';
-    import {ChartNoAxesCombined} from '@lucide/svelte';
+    import {Hash, ChartNoAxesCombined, Check} from '@lucide/svelte';
 
     const iconSizeClass = "w-5 h-5";
     const options = ['average', 'target'];
@@ -34,23 +33,29 @@
                                         : 'border-transparent bg-base-100 hover:bg-base-content/15'}`
                                     }
                                 on:click={() => select(v)}>
-                            <span class="flex items-center gap-1">
-                                <span class="opacity-25 mr-2">
-                                   {#if v === 'target'}
-                                       <Hash class={iconSizeClass}/>
-                                   {:else}
-                                       <ChartNoAxesCombined class={iconSizeClass}/>
-                                   {/if}
-                                </span>
-                                <span>
-                                    <span class="font-bold text-sm">
-                                        {v === 'target' ? 'Count' : 'Average'}
+                            <span class="flex items-center justify-between w-full">
+                                <span class="flex items-center gap-2">
+                                    <span class="opacity-25 mr-2">
+                                       {#if v === 'target'}
+                                           <Hash class={iconSizeClass}/>
+                                       {:else}
+                                           <ChartNoAxesCombined class={iconSizeClass}/>
+                                       {/if}
                                     </span>
-                                    <br>
-                                    <span class="opacity-60 text-sm">
-                                        {v === 'target' ? 'How many times/units in a time period?' : 'Keep an average over a time period'}
+                                    <span>
+                                        <span class="font-bold text-sm">
+                                            {v === 'target' ? 'Count' : 'Average'}
+                                        </span>
+                                        <br>
+                                        <span class="opacity-60 text-sm">
+                                            {v === 'target' ? 'How many times/units in a time period?' : 'Keep an average over a time period'}
+                                        </span>
                                     </span>
                                 </span>
+                                <!-- Right check -->
+                                {#if selected === v}
+                                    <Check class="w-4 h-4 text-primary mr-2"/>
+                                {/if}
                             </span>
                         </button>
                     {/each}
