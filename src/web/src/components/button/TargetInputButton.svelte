@@ -2,7 +2,12 @@
 	import { CircleCheckBig } from '@lucide/svelte';
 	import DropdownButton from '../base/DropdownButton.svelte';
 
-	let { target = 0, unit = $bindable(), frequency = $bindable() } = $props();
+	let { 
+		target = 0, 
+		unit = $bindable(), 
+		frequency = $bindable() 
+	} = $props();
+	
 	let label = $derived(`${target} ${unit} per ${frequency === 'daily' ? 'day' : 'week'}`);
 </script>
 

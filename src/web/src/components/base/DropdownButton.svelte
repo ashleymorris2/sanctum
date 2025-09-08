@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { Component, Icon } from '@lucide/svelte';
+	import { Component } from '@lucide/svelte';
 
 	let {
 		icon: ButtonIcon = null,
@@ -32,7 +32,7 @@
 		<div class="card mt-1 border border-base-content/15 bg-base-100 shadow-2xl card-xs">
 			<div class="card-body p-2">
 				<div class={contentClass}>
-					{@render dropdownContent()}
+					{@render dropdownContent?.()}
 				</div>
 			</div>
 		</div>
