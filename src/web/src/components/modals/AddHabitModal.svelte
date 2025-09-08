@@ -1,5 +1,5 @@
 <script lang="ts">
-    import Modal from './Modal.svelte'
+    import Modal from '../base/Modal.svelte'
     import type {Habit} from '$lib/habit/types';
     import {validateHabit} from "$lib/habit/validation";
     import TargetInputButton from "../button/TargetInputButton.svelte";
@@ -64,15 +64,12 @@
                        class="w-full txt-sm bg-transparent outline-none focus:ring-0 pl-2 pb-6"
                 />
             </div>
-
             <div class="flex items-center pt-4 gap-4">
                 <HabitTypeButton/>
                 <div>
                     <TargetInputButton bind:frequency={frequency} bind:target={target} bind:unit={unit}/>
                 </div>
             </div>
-
-
         </div>
     {/snippet}
 </Modal>

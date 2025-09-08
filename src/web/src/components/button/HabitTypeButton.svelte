@@ -1,68 +1,73 @@
 <script lang="ts">
-    import {Hash, ChartNoAxesCombined, Check} from '@lucide/svelte';
+	import { Hash, ChartNoAxesCombined, Check, Component, LucideComponent } from '@lucide/svelte';
+	import DropdownButton from '../base/DropdownButton.svelte';
+	import type { SvelteComponent } from 'svelte';
 
-    const iconSizeClass = "w-5 h-5";
-    const options = ['average', 'target'];
+	type Option = {
+		value: 'average' | 'target';
+		label: string;
+		description: string;
+		icon: typeof Component;
+	};
 
-    let selected = options[0];
+	const iconSizeClass = 'w-5 h-5';
+	const options = [
+		{
+			value: 'average',
+			label: 'Average',
+			description: 'Keep an average over a time period',
+			icon: ChartNoAxesCombined // Reference to the Svelte icon component
+		},
+		{
+			value: 'target',
+			label: 'Count',
+			description: 'How many times/units in a time period?',
+			icon: Hash
+		}
+	] satisfies Option[];
 
-    function select(v: typeof options[number]) {
-        selected = v;
-    }
+	let selected = options[0];
+
+	function select(v: (typeof options)[number]) {
+		selected = v;
+	}
 </script>
 
-<div class="dropdown">
-    <div tabindex="0"
-         role="button"
-         class="align-middle btn btn-sm btn-outline font-normal border-base-content/20 hover:bg-primary-content/5">
-        <Hash class="w-4 h-4"/>
-        <span class="text-sm">{selected === 'target' ? 'Target' : 'Average'}</span>
-    </div>
-
-    <!--    Dropdown content -->
-    <div tabindex="0" class="dropdown-content flex-g shadow-2xl w-96">
-        <div class="card bg-base-100 card-xs shadow-2xl mt-1 border border-base-content/15">
-            <div class="card-body p-2">
-                <div class="flex flex-col gap-2">
-                    {#each options as v, i (i)}
-                        <button
-                                type="button"
-                                role="radio"
-                                aria-checked={selected === v}
-                                class={`rounded-sm p-2 text-left border transition cursor-pointer ${
-                                    selected===v
-                                        ? 'border-transparent bg-base-200 hover:bg-base-300'
-                                        : 'border-transparent bg-base-100 hover:bg-base-300'}`
-                                    }
-                                on:click={() => select(v)}>
-                            <span class="flex items-center justify-between w-full">
-                                <span class="flex items-center gap-2">
-                                    <span class="opacity-25 mr-2">
-                                       {#if v === 'target'}
-                                           <Hash class={iconSizeClass}/>
-                                       {:else}
-                                           <ChartNoAxesCombined class={iconSizeClass}/>
-                                       {/if}
-                                    </span>
-                                    <span>
-                                        <span class="font-bold text-sm">
-                                            {v === 'target' ? 'Count' : 'Average'}
-                                        </span>
-                                        <br>
-                                        <span class="opacity-60 text-sm">
-                                            {v === 'target' ? 'How many times/units in a time period?' : 'Keep an average over a time period'}
-                                        </span>
-                                    </span>
-                                </span>
-                                <!-- Right check -->
-                                {#if selected === v}
-                                    <Check class="w-4 h-4 text-primary mr-2"/>
-                                {/if}
-                            </span>
-                        </button>
-                    {/each}
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+<DropdownButton icon={selected.icon} buttonLabel={selected.label}>
+	{#snippet dropdownContent()}
+		{#each options as option, i (i)}
+			<button
+				type="button"
+				role="radio"
+				aria-checked={selected.value === option.value}
+				class={`cursor-pointer rounded-sm border p-2 text-left transition ${
+					selected.value === option.value
+						? 'border-transparent bg-base-200 hover:bg-base-300'
+						: 'border-transparent bg-base-100 hover:bg-base-300'
+				}`}
+				on:click={() => select(option)}
+			>
+				<span class="flex w-full items-center justify-between">
+					<span class="flex items-center gap-2">
+						<span class="mr-2 opacity-25">
+							<svelte:component this={option.icon} class={iconSizeClass} />
+						</span>
+						<span>
+							<span class="text-sm font-bold">
+								{option.label}
+							</span>
+							<br />
+							<span class="text-sm opacity-60">
+								{option.description}
+							</span>
+						</span>
+					</span>
+					<!-- Right check -->
+					{#if selected.value === option.value}
+						<Check class="mr-2 h-4 w-4 text-primary" />
+					{/if}
+				</span>
+			</button>
+		{/each}
+	{/snippet}
+</DropdownButton>

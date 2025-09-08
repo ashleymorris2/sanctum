@@ -1,6 +1,6 @@
 import type { Actions } from './$types';
 import { fail } from '@sveltejs/kit';
-import { AUTH_API_BASE } from '$env/static/private';
+import { env } from '$env/dynamic/private';
 import { setRefreshTokenCookie } from '$lib/server/auth/setCookie';
 
 export const actions: Actions = {
@@ -20,7 +20,7 @@ export const actions: Actions = {
 		}
 
 		try {
-			const res = await fetch(`${AUTH_API_BASE}/api/login`, {
+			const res = await fetch(`${env.AUTH_API_BASE}/api/login`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ email, password })

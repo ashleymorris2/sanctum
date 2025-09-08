@@ -1,0 +1,25 @@
+{
+	"name": "web (pnpm)",
+	"dockerComposeFile": ["../../compose.yml"],
+	"service": "web",
+	"runServices": ["metrics", "db"],
+	"workspaceFolder": "/web",
+	"customizations": {
+		"jetbrains": {
+			"settings": {
+				"com.intellij:app:HttpConfigurable.use_proxy_pac": true,
+				"com.intellij:app:ProjectViewSharedSettings.showScratchesAndConsoles": false,
+				"com.intellij:app:ProjectViewSharedSettings.sortKey": "by_time_descending",
+				"com.intellij:app:ProjectViewSharedSettings.showExcludedFiles": false
+			}
+		},
+		"vscode": {
+			"settings": {
+				"npm.packageManager": "pnpm",
+				"terminal.integrated.defaultProfile.linux": "bash"
+			},
+			"extensions": ["svelte.svelte-vscode", "esbenp.prettier-vscode", "dbaeumer.vscode-eslint"]
+		}
+	},
+	"postCreateCommand": "pnpm install"
+}
