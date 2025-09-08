@@ -5,11 +5,13 @@
 	let {
 		icon: ButtonIcon = null,
 		buttonLabel,
-		dropdownContent
+		dropdownContent,
+		contentClass = 'flex flex-col gap-2'
 	} = $props<{
 		icon?: typeof Component | null;
 		buttonLabel: string;
 		dropdownContent: Snippet;
+		contentClass?: string;
 	}>();
 </script>
 
@@ -29,7 +31,7 @@
 	<div class="dropdown-content flex-g w-96 shadow-2xl">
 		<div class="card mt-1 border border-base-content/15 bg-base-100 shadow-2xl card-xs">
 			<div class="card-body p-2">
-				<div class="flex flex-col gap-2">
+				<div class={contentClass}>
 					{@render dropdownContent()}
 				</div>
 			</div>

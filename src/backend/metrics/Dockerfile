@@ -25,4 +25,4 @@ COPY . .
 EXPOSE 8080 40000
 
 # Command to run the application with hot reloading
-CMD ["dlv", "debug", "./cmd/api", "--headless", "--listen=0.0.0.0:40000", "--api-version=2", "--accept-multiclient", "--log"]
+CMD ["dlv", "debug", "./cmd/api", "--headless", "--listen=0.0.0.0:40000", "--api-version=2", "--accept-multiclient", "--log", "--continue"]
