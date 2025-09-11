@@ -17,13 +17,13 @@ export function validateHabit(input: Habit): { errors: HabitErrors; isValid: boo
 		errors.name = 'Name is required';
 	}
 
-	if (input.target === null || input.target <= 0) {
-		errors.target = 'Target must be ≥ 0';
-	}
+	// if (input.target === null || input.target <= 0) {
+	// 	errors.target = 'Target must be ≥ 0';
+	// }
 
-	if (!FREQ.includes(input.frequency as Frequency)) {
-		errors.frequency = `Use one of: ${FREQ.join(', ')}`;
-	}
+	// if (!FREQ.includes(input.frequency as Frequency)) {
+	// 	errors.frequency = `Use one of: ${FREQ.join(', ')}`;
+	// }
 
 	return { errors, isValid: Object.keys(errors).length === 0 };
 }

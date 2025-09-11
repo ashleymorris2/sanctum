@@ -1,10 +1,9 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { Component } from '@lucide/svelte';
-	import { shortId } from '$lib/crypto/random';
 
 	let {
-		id = $bindable(`${shortId()}`),
+		id = $bindable(''),
 		onToggleDropdown,
 		icon: ButtonIcon = null,
 		buttonLabel,
