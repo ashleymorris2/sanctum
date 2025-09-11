@@ -2,6 +2,16 @@
 	import { Hash, ChartNoAxesCombined, Check, Component } from '@lucide/svelte';
 	import DropdownButton from '../base/DropdownButton.svelte';
 
+	let {
+		id = $bindable(),
+		onToggleDropdown,
+		open = false
+	} = $props<{
+		id?: string | null;
+		onToggleDropdown?: (id: string) => void;
+		open?: boolean;
+	}>();
+
 	type Option = {
 		value: 'avg' | 'num';
 		label: string;
@@ -31,7 +41,7 @@
 	}
 </script>
 
-<DropdownButton icon={selected.icon} buttonLabel={selected.label}>
+<DropdownButton icon={selected.icon} buttonLabel={selected.label} {onToggleDropdown} {open}>
 	{#snippet dropdownContent()}
 		{#each options as option, i (i)}
 			<button

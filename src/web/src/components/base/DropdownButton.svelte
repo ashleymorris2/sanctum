@@ -1,14 +1,19 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { Component } from '@lucide/svelte';
+	import { shortId } from '$lib/crypto/random';
 
 	let {
+		id = $bindable(`${shortId()}`),
+		onToggleDropdown,
 		icon: ButtonIcon = null,
 		buttonLabel,
 		dropdownContent,
 		contentClass = 'flex flex-col gap-2',
 		open = $bindable(false)
 	} = $props<{
+		id?: string;
+		onToggleDropdown?: (id: string) => void;
 		icon?: typeof Component | null;
 		buttonLabel: string;
 		dropdownContent: Snippet;
@@ -16,16 +21,17 @@
 		open?: boolean;
 	}>();
 
-	function toggleDropdown() {
-		open = !open;
-	}
-
-	function closeDropdown() {
-		open = false;
+	function toggleDropdown(event: MouseEvent) {
+		event.preventDefault();
+		if (onToggleDropdown) {
+			onToggleDropdown(id);
+		} else {
+			open = !open;
+		}
 	}
 </script>
 
-<details class="dropdown" class:dropdown-open={open}>
+<details class="dropdown" {open}>
 	<summary
 		class="btn border-base-content/20 align-middle font-normal btn-outline btn-sm hover:bg-primary-content/5"
 		onclick={toggleDropdown}
