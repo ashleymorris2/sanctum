@@ -38,6 +38,22 @@
 		if (open) resetFrom(habit);
 	});
 
+	let host: HTMLElement;
+	$effect(() => {
+		const clickAway = (e: Event) => {
+			if (host && !host.contains(e.target as Node)) group.close();
+		};
+		const esc = (e: KeyboardEvent) => {
+			if (e.key === 'Escape') group.close();
+		};
+		document.addEventListener('pointerdown', clickAway);
+		document.addEventListener('keydown', esc);
+		return () => {
+			document.removeEventListener('pointerdown', clickAway);
+			document.removeEventListener('keydown', esc);
+		};
+	});
+
 	const input = $derived.by(() => ({
 		id: habit?.id,
 		name,
@@ -74,7 +90,7 @@
 					class="txt-sm w-full bg-transparent pb-6 pl-2 outline-none focus:ring-0"
 				/>
 			</div>
-			<div class="flex items-center gap-4 pt-4">
+			<div bind:this={host} class="flex items-center gap-4 pt-4">
 				<div>
 					<HabitTypeButton id={habitBtnId} open={habitOpen} onToggleDropdown={group.toggle} />
 				</div>
