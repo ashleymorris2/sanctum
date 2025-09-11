@@ -3,14 +3,14 @@
 	import DropdownButton from '../base/DropdownButton.svelte';
 
 	let {
-		id = $bindable(),
+		id,
 		onToggleDropdown,
 		target = $bindable('0'),
 		unit = $bindable(),
 		frequency = $bindable(),
 		open = false
 	} = $props<{
-		id?: string | null;
+		id?: string;
 		onToggleDropdown?: (id: string) => void;
 		target?: string;
 		unit?: string;
@@ -22,6 +22,7 @@
 </script>
 
 <DropdownButton
+	bind:id
 	icon={CircleCheckBig}
 	buttonLabel={label}
 	contentClass="flex gap-4"

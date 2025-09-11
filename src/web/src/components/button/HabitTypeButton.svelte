@@ -3,11 +3,11 @@
 	import DropdownButton from '../base/DropdownButton.svelte';
 
 	let {
-		id = $bindable(),
+		id,
 		onToggleDropdown,
 		open = false
 	} = $props<{
-		id?: string | null;
+		id?: string;
 		onToggleDropdown?: (id: string) => void;
 		open?: boolean;
 	}>();
@@ -41,7 +41,7 @@
 	}
 </script>
 
-<DropdownButton icon={selected.icon} buttonLabel={selected.label} {onToggleDropdown} {open}>
+<DropdownButton bind:id icon={selected.icon} buttonLabel={selected.label} {onToggleDropdown} {open}>
 	{#snippet dropdownContent()}
 		{#each options as option, i (i)}
 			<button
