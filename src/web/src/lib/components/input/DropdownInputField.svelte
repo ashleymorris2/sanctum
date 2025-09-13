@@ -11,7 +11,7 @@
 		label: string;
 		icon: typeof Component;
 		children: Snippet;
-		selectElement?: HTMLSelectElement;
+		selectElement?: HTMLSelectElement | null;
 	}>();
 
 	function openSelect() {

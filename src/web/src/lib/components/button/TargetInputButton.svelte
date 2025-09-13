@@ -19,9 +19,10 @@
 		open?: boolean;
 	}>();
 
-	let label = $derived(`${target} ${unit} per ${frequency === 'daily' ? 'day' : 'week'}`);
 	let unitSelectElement = $state<HTMLSelectElement | null>(null);
 	let frequencySelectElement = $state<HTMLSelectElement | null>(null);
+
+	let label = $derived(`${target} ${unit} per ${frequency === 'daily' ? 'day' : 'week'}`);
 </script>
 
 <DropdownButton
@@ -33,43 +34,41 @@
 	{onToggleDropdown}
 	{open}
 >
-	{#snippet dropdownContent()}
-		<DropdownInputField label="Target" icon={Target}>
-			<input
-				dir="ltr"
-				id="target-input"
-				class="text-right"
-				type="number"
-				bind:value={target}
-				min="1"
-				placeholder="15"
-			/>
-		</DropdownInputField>
+	<DropdownInputField label="Target" icon={Target}>
+		<input
+			dir="ltr"
+			id="target-input"
+			class="text-right"
+			type="number"
+			bind:value={target}
+			min="1"
+			placeholder="15"
+		/>
+	</DropdownInputField>
 
-		<DropdownInputField label="Unit" icon={Target} bind:selectElement={unitSelectElement}>
-			<select
-				class="input-simple select border-transparent bg-transparent text-right outline-0 focus:outline-transparent"
-				bind:value={unit}
-				bind:this={unitSelectElement}
-				id="unit-input"
-			>
-				<option selected>Times</option>
-				<option>Reps</option>
-				<option>Amber</option>
-				<option>Velvet</option>
-			</select>
-		</DropdownInputField>
+	<DropdownInputField label="Unit" icon={Target} bind:selectElement={unitSelectElement}>
+		<select
+			class="input-simple select border-transparent bg-transparent text-right outline-0 focus:outline-transparent"
+			bind:value={unit}
+			bind:this={unitSelectElement}
+			id="unit-input"
+		>
+			<option selected>Times</option>
+			<option>Reps</option>
+			<option>Pages</option>
+			<option>Velvet</option>
+		</select>
+	</DropdownInputField>
 
-		<DropdownInputField label="Frequency" icon={Target} bind:selectElement={frequencySelectElement}>
-			<select
-				class="input-simple select border-transparent bg-transparent text-right outline-0 focus:outline-transparent"
-				bind:value={frequency}
-				bind:this={frequencySelectElement}
-				id="frequency-input"
-			>
-				<option selected>Daily</option>
-				<option>Weekly</option>
-			</select>
-		</DropdownInputField>
-	{/snippet}
+	<DropdownInputField label="Frequency" icon={Target} bind:selectElement={frequencySelectElement}>
+		<select
+			class="input-simple select border-transparent bg-transparent text-right outline-0 focus:outline-transparent"
+			bind:value={frequency}
+			bind:this={frequencySelectElement}
+			id="frequency-input"
+		>
+			<option selected>Daily</option>
+			<option>Weekly</option>
+		</select>
+	</DropdownInputField>
 </DropdownButton>

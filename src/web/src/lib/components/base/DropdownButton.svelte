@@ -7,7 +7,7 @@
 		onToggleDropdown,
 		icon: ButtonIcon = null,
 		buttonLabel,
-		dropdownContent,
+		children,
 		styles = 'w-96',
 		contentClass = 'flex flex-col gap-2',
 		open = $bindable(false)
@@ -16,7 +16,7 @@
 		onToggleDropdown?: (id: string) => void;
 		icon?: typeof Component | null;
 		buttonLabel: string;
-		dropdownContent: Snippet;
+		children: Snippet;
 		styles?: string;
 		contentClass?: string;
 		open?: boolean;
@@ -48,7 +48,7 @@
 		<div class="card mt-1 rounded-lg border border-base-content/15 bg-base-100 shadow-2xl card-xs">
 			<div class="card-body p-2">
 				<div class={contentClass}>
-					{@render dropdownContent?.()}
+					{@render children()}
 				</div>
 			</div>
 		</div>
