@@ -1,5 +1,5 @@
 <script lang="ts">
-    import LoginForm from '../../components/LoginForm.svelte';
+    import LoginForm from '../../lib/components/LoginForm.svelte';
     import type { ActionData } from './$types';
 
     export let form: ActionData;

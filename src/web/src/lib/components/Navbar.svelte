@@ -1,5 +1,5 @@
 <script lang="ts">
-    import AddHabitButton from "./AddHabitButton.svelte";
+    import AddHabitButton from "./button/AddHabitButton.svelte";
 
     const {
         title = 'Navigation'

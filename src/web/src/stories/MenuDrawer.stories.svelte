@@ -1,6 +1,6 @@
 <script module lang="ts">
     import {defineMeta} from '@storybook/addon-svelte-csf';
-    import MenuDrawer from '../components/MenuDrawer.svelte';
+    import MenuDrawer from '$lib/components/MenuDrawer.svelte';
 
     const {Story} = defineMeta({
         title: 'Navigation/SideMenu',

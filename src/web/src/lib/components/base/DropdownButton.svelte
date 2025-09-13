@@ -8,6 +8,7 @@
 		icon: ButtonIcon = null,
 		buttonLabel,
 		dropdownContent,
+		styles = 'w-96',
 		contentClass = 'flex flex-col gap-2',
 		open = $bindable(false)
 	} = $props<{
@@ -16,6 +17,7 @@
 		icon?: typeof Component | null;
 		buttonLabel: string;
 		dropdownContent: Snippet;
+		styles?: string;
 		contentClass?: string;
 		open?: boolean;
 	}>();
@@ -42,8 +44,8 @@
 	</summary>
 
 	<!--    Dropdown content -->
-	<div class="dropdown-content flex-g w-96 shadow-2xl">
-		<div class="card mt-1 rounded-sm border border-base-content/15 bg-base-100 shadow-2xl card-xs">
+	<div class={`dropdown-content flex-g ${styles} shadow-2xl`}>
+		<div class="card mt-1 rounded-lg border border-base-content/15 bg-base-100 shadow-2xl card-xs">
 			<div class="card-body p-2">
 				<div class={contentClass}>
 					{@render dropdownContent?.()}

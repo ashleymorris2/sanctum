@@ -22,7 +22,7 @@
 </script>
 
 <dialog bind:this={modal} class="modal" onclose={onClose}>
-	<div class="modal-box overflow-visible rounded-xl p-0 shadow-xl">
+	<div class="modal-box overflow-visible rounded-lg p-0 shadow-xl">
 		{@render content?.()}
 
 		<div class="divider m-0 h-0"></div>

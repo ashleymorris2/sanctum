@@ -1,7 +1,7 @@
 <script lang="ts">
     import { page } from '$app/state';
-    import Navbar from "../../components/Navbar.svelte";
-    import MenuDrawer from "../../components/MenuDrawer.svelte";
+    import Navbar from "../../lib/components/Navbar.svelte";
+    import MenuDrawer from "../../lib/components/MenuDrawer.svelte";
 
     let {children} = $props();
     let pathname = $derived(page.url.pathname);

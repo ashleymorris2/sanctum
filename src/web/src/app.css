@@ -3,71 +3,53 @@
 @tailwind utilities;
 
 @plugin "daisyui" {
-    themes: dark --prefersdark;
+	themes: dark --prefersdark;
 }
 
-
 @plugin "daisyui/theme" {
-    name: "sanctum";
-    default: true;
-    prefersdark: false;
-    color-scheme: "light";
-    --color-base-100: oklch(98% 0.002 247.839);
-    --color-base-200: oklch(96% 0.003 264.542);
-    --color-base-300: oklch(92% 0.006 264.531);
-    --color-base-content: oklch(21% 0.034 264.665);
-    --color-primary: oklch(70% 0.14 182.503);
-    --color-primary-content: oklch(98% 0.014 180.72);
-    --color-secondary: oklch(79% 0.184 86.047);
-    --color-secondary-content: oklch(98% 0.026 102.212);
-    --color-accent: oklch(0% 0 0);
-    --color-accent-content: oklch(100% 0 0);
-    --color-neutral: oklch(13% 0.028 261.692);
-    --color-neutral-content: oklch(98% 0.002 247.839);
-    --color-info: oklch(71% 0.143 215.221);
-    --color-info-content: oklch(98% 0.019 200.873);
-    --color-success: oklch(72% 0.219 149.579);
-    --color-success-content: oklch(98% 0.018 155.826);
-    --color-warning: oklch(70% 0.213 47.604);
-    --color-warning-content: oklch(98% 0.016 73.684);
-    --color-error: oklch(63% 0.237 25.331);
-    --color-error-content: oklch(97% 0.013 17.38);
-    --radius-selector: 1rem;
-    --radius-field: 0.5rem;
-    --radius-box: 0.5rem;
-    --size-selector: 0.25rem;
-    --size-field: 0.25rem;
-    --border: 1px;
-    --depth: 0;
-    --noise: 1;
+	name: 'sanctum';
+	default: true;
+	prefersdark: false;
+	color-scheme: 'light';
+	--color-base-100: oklch(98% 0.002 247.839);
+	--color-base-200: oklch(96% 0.003 264.542);
+	--color-base-300: oklch(92% 0.006 264.531);
+	--color-base-content: oklch(21% 0.034 264.665);
+	--color-primary: oklch(70% 0.14 182.503);
+	--color-primary-content: oklch(98% 0.014 180.72);
+	--color-secondary: oklch(79% 0.184 86.047);
+	--color-secondary-content: oklch(98% 0.026 102.212);
+	--color-accent: oklch(0% 0 0);
+	--color-accent-content: oklch(100% 0 0);
+	--color-neutral: oklch(13% 0.028 261.692);
+	--color-neutral-content: oklch(98% 0.002 247.839);
+	--color-info: oklch(71% 0.143 215.221);
+	--color-info-content: oklch(98% 0.019 200.873);
+	--color-success: oklch(72% 0.219 149.579);
+	--color-success-content: oklch(98% 0.018 155.826);
+	--color-warning: oklch(70% 0.213 47.604);
+	--color-warning-content: oklch(98% 0.016 73.684);
+	--color-error: oklch(63% 0.237 25.331);
+	--color-error-content: oklch(97% 0.013 17.38);
+	--radius-selector: 1rem;
+	--radius-field: 0.5rem;
+	--radius-box: 0.5rem;
+	--size-selector: 0.25rem;
+	--size-field: 0.25rem;
+	--border: 1px;
+	--depth: 0;
+	--noise: 1;
 }
 
 @layer components {
-    .input-simple {
-        @apply
-        input
-        rounded-md
-        border
-        border-base-300
-        bg-base-100
-        focus:border-secondary
-        text-[0.875rem]
-        focus:ring-0
-        focus:outline-none
-        p-2
-        outline-none;
-    }
-
-    /*.input-floating-label {*/
-    /*    @apply left-3 top-1 text-xs font-medium text-base-content/70;*/
-    /*}*/
+	.input-simple {
+		@apply input rounded-md border-base-content/45 bg-transparent text-[0.875rem] outline-none focus:border-none focus:ring-0 focus:outline-none;
+	}
 }
 
 @layer utilities {
-    .menu :where(li > *:not(ul):not(.menu-title)).active-item,
-    .menu :where(li > *:not(ul):not(.menu-title))[aria-current="page"] {
-        @apply text-[#007A6D] bg-primary/10 font-semibold;
-    }
+	.menu :where(li > *:not(ul):not(.menu-title)).active-item,
+	.menu :where(li > *:not(ul):not(.menu-title))[aria-current='page'] {
+		@apply bg-primary/10 font-semibold text-[#007A6D];
+	}
 }
-
-
