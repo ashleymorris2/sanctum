@@ -6,11 +6,13 @@
 		label,
 		icon: DisplayIcon,
 		children,
+		class: className = '',
 		selectElement = $bindable(null)
 	} = $props<{
 		label: string;
 		icon: typeof Component;
 		children: Snippet;
+		class?: string;
 		selectElement?: HTMLSelectElement | null;
 	}>();
 
@@ -33,8 +35,10 @@
 </script>
 
 {#snippet content(props = {})}
-	<div class="flex flex-1 items-center" {...props}>
-		<label class="input-simple flex items-center justify-between gap-8 border-transparent">
+	<div class="flex flex-1 items-center hover:rounded-lg hover:bg-base-300 {className}" {...props}>
+		<label
+			class="input-simple flex cursor-pointer items-center justify-between gap-8 border-transparent focus-within:outline-none"
+		>
 			<span class="inline-flex items-center gap-2">
 				<span class="flex items-center opacity-50">
 					<DisplayIcon class="h-4 w-4" />

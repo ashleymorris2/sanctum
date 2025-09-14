@@ -45,6 +45,10 @@
 	.input-simple {
 		@apply input rounded-md border-base-content/45 bg-transparent text-[0.875rem] outline-none focus:border-none focus:ring-0 focus:outline-none;
 	}
+
+	.select-simple {
+		@apply select border-transparent bg-transparent text-right outline-0 focus:outline-transparent;
+	}
 }
 
 @layer utilities {

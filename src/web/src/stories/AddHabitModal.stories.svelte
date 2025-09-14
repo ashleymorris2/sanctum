@@ -1,6 +1,6 @@
 <script module lang="ts">
 	import { defineMeta } from '@storybook/addon-svelte-csf';
-	import AddHabitModal from '$lib/components/modals/AddHabitModal.svelte';
+	import AddHabitModal from '$lib/components/modals/HabitFormModal.svelte';
 
 	const { Story } = defineMeta({
 		title: 'Modals/AddHabitModal',

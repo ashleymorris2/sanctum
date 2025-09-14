@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Plus } from '@lucide/svelte';
-	import AddHabitModal from '../modals/AddHabitModal.svelte';
+	import AddHabitModal from '../modals/HabitFormModal.svelte';
 	import type { Habit } from '$lib/habit/types';
 
 	let open = $state(false);

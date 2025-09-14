@@ -2,8 +2,8 @@
 	import Modal from '../base/Modal.svelte';
 	import type { Habit } from '$lib/habit/types';
 	import { DropdownGroup } from '$lib/stores/dropdownGroup.svelte';
-	import TargetInputButton from '../button/TargetInputButton.svelte';
-	import HabitTypeButton from '../button/HabitTypeButton.svelte';
+	import TargetInputButton from '../button/HabitTargetDropdownButton.svelte';
+	import HabitTypeButton from '../button/HabitTypeDropdownButton.svelte';
 	import { useHabitForm } from '$lib/hooks/useHabitform.svelte';
 
 	let {
