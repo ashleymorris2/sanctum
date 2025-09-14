@@ -7,14 +7,14 @@
 	let {
 		id,
 		onToggleDropdown,
-		target = $bindable('0'),
+		target = $bindable(0),
 		unit = $bindable(),
 		frequency = $bindable(),
 		open = false
 	} = $props<{
 		id?: string;
 		onToggleDropdown?: (id: string) => void;
-		target?: string;
+		target?: number;
 		unit?: string;
 		frequency?: string;
 		open?: boolean;
@@ -47,16 +47,7 @@
 	{open}
 >
 	<DropdownInputField label="Target" icon={Target} class="px-1 py-0.5">
-		<!-- <input
-			dir="ltr"
-			id="target-input"
-			class="text-right"
-			type="number"
-			bind:value={target}
-			min="1"
-			placeholder="15"
-		/> -->
-		<NumberPicker />
+		<NumberPicker bind:value={target} />
 	</DropdownInputField>
 
 	<DropdownInputField

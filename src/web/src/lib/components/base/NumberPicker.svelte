@@ -2,7 +2,8 @@
 	import Minus from '@lucide/svelte/icons/minus';
 	import Plus from '@lucide/svelte/icons/plus';
 
-	let value = $state(15);
+	// Make value a bindable prop with a default, declared as a prop
+	let { value = $bindable(15) } = $props<{ value: Number }>();
 	const minValue = 0;
 
 	function increment() {
@@ -30,7 +31,7 @@
 
 <div class="*:not-first:mt-2">
 	<div
-		class=" relative inline-flex h-7 w-24 items-center overflow-hidden rounded-md border text-sm whitespace-nowrap focus-within:border focus-within:outline-hidden"
+		class=" relative inline-flex h-7 w-26 items-center overflow-hidden rounded-md border text-sm whitespace-nowrap focus-within:border focus-within:outline-hidden"
 	>
 		<button
 			id="decrement-button"
