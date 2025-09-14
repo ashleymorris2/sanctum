@@ -4,7 +4,7 @@ import { validateHabit } from '$lib/habit/validation';
 export function useHabitForm(habit: Habit | null = null) {
 	let name = $state('');
 	let description = $state('');
-	let target = $state('');
+	let target = $state(0);
 	let unit = $state('');
 	let frequency = $state('');
 	let aggregation = $state<'avg' | 'sum' | 'latest'>('avg');
@@ -12,7 +12,7 @@ export function useHabitForm(habit: Habit | null = null) {
 	function resetForm(h: Habit | null) {
 		name = h?.name ?? '';
 		description = h?.description ?? '';
-		target = h?.target?.toString() ?? '1';
+		target = h?.target ?? 1;
 		unit = h?.unit ?? 'time';
 		frequency = h?.frequency ?? 'daily';
 		aggregation = h?.aggregation ?? 'avg';
@@ -22,7 +22,7 @@ export function useHabitForm(habit: Habit | null = null) {
 		id: habit?.id ?? '',
 		name,
 		description,
-		target: target === '' ? null : Number(target),
+		target: target === 0 ? null : Number(target),
 		unit,
 		frequency,
 		aggregation
@@ -52,7 +52,7 @@ export function useHabitForm(habit: Habit | null = null) {
 		get target() {
 			return target;
 		},
-		set target(v: string) {
+		set target(v: number) {
 			target = v;
 		},
 
