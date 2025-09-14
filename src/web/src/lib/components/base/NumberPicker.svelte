@@ -30,18 +30,18 @@
 
 <div class="*:not-first:mt-2">
 	<div
-		class="border-input ring-offset-background focus-within:border-ring focus-within:ring-ring/30 relative inline-flex h-9 w-full items-center overflow-hidden rounded-lg border text-sm whitespace-nowrap shadow-xs shadow-black/[.04] transition-shadow focus-within:ring-2 focus-within:ring-offset-2 focus-within:outline-hidden"
+		class=" relative inline-flex h-7 w-24 items-center overflow-hidden rounded-md border text-sm whitespace-nowrap focus-within:border focus-within:outline-hidden"
 	>
 		<button
 			id="decrement-button"
 			onclick={decrement}
-			class="border-input bg-background text-muted-foreground/80 ring-offset-background hover:text-foreground -ms-px flex aspect-square h-[inherit] items-center justify-center rounded-s-lg border text-sm transition-shadow hover:bg-accent disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
+			class="flex h-8 w-10 items-center justify-center rounded-l-md border-r border-l border-base-content/20 border-l-transparent bg-transparent text-base-content/60 transition-colors hover:bg-base-300 hover:text-base-content disabled:cursor-not-allowed disabled:opacity-50"
 			aria-label="Decrease value"
 			aria-labelledby="decrement-button {uid}"
 			aria-controls={uid}
 			disabled={value <= minValue}
 		>
-			<Minus size={16} aria-hidden="true" />
+			<Minus size={14} aria-hidden="true" />
 		</button>
 		<input
 			id={uid}
@@ -60,12 +60,12 @@
 		<button
 			id="increment-button"
 			onclick={increment}
-			class="border-input bg-background text-muted-foreground/80 ring-offset-background hover:text-foreground -me-px flex aspect-square h-[inherit] items-center justify-center rounded-e-lg border text-sm transition-shadow hover:bg-accent disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
+			class="flex h-8 w-10 items-center justify-center rounded-r-md border-r border-l border-base-content/20 border-r-transparent bg-transparent text-base-content/60 transition-colors hover:bg-base-content/5 hover:text-base-content disabled:cursor-not-allowed disabled:opacity-50"
 			aria-label="Increase value"
 			aria-labelledby="increment-button {uid}"
 			aria-controls={uid}
 		>
-			<Plus size={16} aria-hidden="true" />
+			<Plus size={14} aria-hidden="true" />
 		</button>
 	</div>
 </div>
