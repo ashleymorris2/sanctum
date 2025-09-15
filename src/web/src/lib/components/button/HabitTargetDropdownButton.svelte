@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { CircleCheckBig, Target } from '@lucide/svelte';
+	import { CircleCheckBig, Target, Scale, RulerDimensionLine, Repeat } from '@lucide/svelte';
 	import DropdownButton from '../base/DropdownButton.svelte';
 	import DropdownInputField from '../base/DropdownInputField.svelte';
 	import NumberPicker from '../base/NumberPicker.svelte';
@@ -46,16 +46,11 @@
 	{onToggleDropdown}
 	{open}
 >
-	<DropdownInputField label="Target" icon={Target} class="px-1 py-0.5">
-		<NumberPicker bind:value={target} />
+	<DropdownInputField label="Target" class="px-1 py-0.5">
+		<NumberPicker bind:value={target} class="w-30" />
 	</DropdownInputField>
 
-	<DropdownInputField
-		label="Unit"
-		icon={Target}
-		class="px-1 py-0.5"
-		bind:selectElement={unitSelectElement}
-	>
+	<DropdownInputField label="Unit" class="px-1 py-0.5" bind:selectElement={unitSelectElement}>
 		<select
 			id="unit-input"
 			class="input-simple select-simple cursor-pointer"
@@ -70,7 +65,6 @@
 
 	<DropdownInputField
 		label="Frequency"
-		icon={Target}
 		class="px-1 py-0.5"
 		bind:selectElement={frequencySelectElement}
 	>

@@ -12,7 +12,7 @@
 		contentClass = 'flex flex-col gap-2',
 		open = $bindable(false)
 	} = $props<{
-		id?: string;
+		id: string;
 		onToggleDropdown?: (id: string) => void;
 		icon?: typeof Component | null;
 		buttonLabel: string;

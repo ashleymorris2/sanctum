@@ -1,7 +1,5 @@
 <script lang="ts">
-	import { Component, Icon } from '@lucide/svelte';
-	import Minus from '@lucide/svelte/icons/minus';
-	import Plus from '@lucide/svelte/icons/plus';
+	import { Component, Minus, Plus } from '@lucide/svelte';
 
 	// Make value a bindable prop with a default, declared as a prop
 	let {
@@ -9,7 +7,7 @@
 		minValue = 0,
 		maxValue = 10,
 		class: className = ''
-	} = $props<{ value: number; minValue: number; maxValue: number; class?: string }>();
+	} = $props<{ value: number; minValue?: number; maxValue?: number; class?: string }>();
 
 	function increment() {
 		if (value < maxValue) {

@@ -4,13 +4,13 @@
 
 	let {
 		label,
-		icon: DisplayIcon,
+		icon: DisplayIcon = null,
 		children,
 		class: className = '',
 		selectElement = $bindable(null)
 	} = $props<{
 		label: string;
-		icon: typeof Component;
+		icon?: typeof Component;
 		children: Snippet;
 		class?: string;
 		selectElement?: HTMLSelectElement | null;
@@ -40,12 +40,16 @@
 			class="input-simple flex cursor-pointer items-center justify-between gap-8 border-transparent focus-within:outline-none"
 		>
 			<span class="inline-flex items-center gap-2">
-				<span class="flex items-center opacity-50">
-					<DisplayIcon class="h-4 w-4" />
-				</span>
-				<span class="leading-none font-semibold">{label}</span>
+				{#if DisplayIcon}
+					<span class="flex items-center opacity-40">
+						<DisplayIcon class="h-3 w-3" />
+					</span>
+				{/if}
+				<span class="leading-none font-semibold text-base-content/60 select-none">{label}</span>
 			</span>
-			{@render children()}
+			<span class="ml-auto flex items-center justify-end">
+				{@render children()}
+			</span>
 		</label>
 	</div>
 {/snippet}
