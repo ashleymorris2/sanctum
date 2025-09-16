@@ -34,30 +34,6 @@
 	const uid = $props.id();
 </script>
 
-{#snippet controlButton(
-	uid: string,
-	id: string,
-	ariaLabel: string,
-	disabled: boolean,
-	ButtonIcon: typeof Component,
-	onClick: (e: MouseEvent) => void,
-	className = '',
-	props = {}
-)}
-	<button
-		{id}
-		onclick={onClick}
-		class="flex h-8 w-12 items-center justify-center border-r border-l {className} border-base-content/30 bg-base-100 text-base-content/60 transition-colors hover:bg-base-300 hover:text-base-content disabled:cursor-not-allowed disabled:opacity-50"
-		aria-label={ariaLabel}
-		aria-labelledby="{id} {uid}"
-		aria-controls={uid}
-		{disabled}
-		{...props}
-	>
-		<ButtonIcon size={14} aria-hidden="true" />
-	</button>
-{/snippet}
-
 <div class="*:not-first:mt-2">
 	<div
 		class=" relative inline-flex h-7 {className ??
@@ -100,3 +76,27 @@
 		)}
 	</div>
 </div>
+
+{#snippet controlButton(
+	uid: string,
+	id: string,
+	ariaLabel: string,
+	disabled: boolean,
+	ButtonIcon: typeof Component,
+	onClick: (e: MouseEvent) => void,
+	className = '',
+	props = {}
+)}
+	<button
+		{id}
+		onclick={onClick}
+		class="flex h-8 w-12 items-center justify-center border-r border-l {className} border-base-content/30 bg-base-100 text-base-content/60 transition-colors hover:bg-base-300 hover:text-base-content disabled:cursor-not-allowed disabled:opacity-50"
+		aria-label={ariaLabel}
+		aria-labelledby="{id} {uid}"
+		aria-controls={uid}
+		{disabled}
+		{...props}
+	>
+		<ButtonIcon size={14} aria-hidden="true" />
+	</button>
+{/snippet}

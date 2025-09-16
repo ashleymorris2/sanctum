@@ -45,7 +45,7 @@
 						<DisplayIcon class="h-3 w-3" />
 					</span>
 				{/if}
-				<span class="leading-none font-semibold text-base-content/60 select-none">{label}</span>
+				<span class="text-sm leading-none font-semibold select-none">{label}</span>
 			</span>
 			<span class="ml-auto flex items-center justify-end">
 				{@render children()}
