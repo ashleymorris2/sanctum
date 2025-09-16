@@ -39,7 +39,7 @@
 						for={option.id}
 						class={`inline-flex flex-1 
 					items-center gap-2 rounded-lg border border-base-content/20 bg-base-100 text-sm ${pad}
-					cursor-pointer shadow-sm peer-checked:border-base-content/60 peer-checked:bg-base-200 peer-checked:text-base-content
+					cursor-pointer tracking-wide peer-checked:border-base-content/60 peer-checked:bg-base-200 peer-checked:text-base-content peer-checked:shadow-sm
 					`}
 					>
 						<span class="leading-none">{option.label}</span>

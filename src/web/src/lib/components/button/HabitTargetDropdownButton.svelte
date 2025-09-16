@@ -22,8 +22,7 @@
 	}>();
 
 	let unitSelectElement = $state<HTMLSelectElement | null>(null);
-	let frequencySelectElement = $state<HTMLSelectElement | null>(null);
-
+		
 	let buttonLabel = $derived(`${target} ${unit} per ${frequency === 'daily' ? 'day' : 'week'}`);
 
 	const unitOptions = [
@@ -43,7 +42,7 @@
 <DropdownButton
 	bind:id
 	icon={CircleCheckBig}
-	styles="w-auto min-w-[18em]"
+	styles="w-auto"
 	{buttonLabel}
 	{onToggleDropdown}
 	{open}

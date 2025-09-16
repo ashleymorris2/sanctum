@@ -21,13 +21,40 @@
 		}
 	}
 
+	function handleBeforeInput(event: Event) {
+		const beforeInputEvent = event as InputEvent;
+		const input = event.target as HTMLInputElement;
+
+		// Allow backspace, delete, and other control characters
+		if (!beforeInputEvent.data) return;
+
+		// Only allow digits
+		if (!/^\d+$/.test(beforeInputEvent.data)) {
+			event.preventDefault();
+			return;
+		}
+
+		// Check if the resulting value would be in range
+		const currentValue = input.value;
+		const selectionStart = input.selectionStart || 0;
+		const selectionEnd = input.selectionEnd || 0;
+		const newValue =
+			currentValue.slice(0, selectionStart) +
+			beforeInputEvent.data +
+			currentValue.slice(selectionEnd);
+		const numValue = Number.parseInt(newValue, 10);
+
+		if (numValue > maxValue) {
+			event.preventDefault();
+		}
+	}
+
 	function handleInput(event: Event) {
 		const input = event.target as HTMLInputElement;
 		const newValue = Number.parseInt(input.value, 10);
-		if (!Number.isNaN(newValue) && newValue >= minValue) {
+		if (Number.isNaN(newValue)) return;
+		if (newValue >= minValue && newValue <= maxValue) {
 			value = newValue;
-		} else {
-			input.value = value.toString();
 		}
 	}
 
@@ -54,6 +81,7 @@
 			type="text"
 			bind:value
 			oninput={handleInput}
+			onbeforeinput={handleBeforeInput}
 			aria-labelledby={uid}
 			autocomplete="off"
 			inputmode="numeric"
