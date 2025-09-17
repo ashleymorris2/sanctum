@@ -63,8 +63,8 @@
 
 <div class="*:not-first:mt-2">
 	<div
-		class=" relative inline-flex h-7 {className ??
-			'w-auto'} items-center overflow-hidden rounded-md border border-base-content/30 text-sm whitespace-nowrap focus-within:border focus-within:outline-hidden"
+		class=" relative inline-flex h-7 {className ?? 'w-auto'} items-center overflow-hidden
+		rounded-md border border-base-content/30 text-sm whitespace-nowrap focus-within:border focus-within:outline-hidden"
 	>
 		{@render controlButton(
 			uid,

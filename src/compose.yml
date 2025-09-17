@@ -7,8 +7,8 @@ services:
       - ./web/.env
     environment:
       - CHOKIDAR_USEPOLLING=true
-      - VITE_HOST=0.0.0.0            # Vite listen on all interfaces
-      - STORYBOOK_HOST=0.0.0.0       # if you use Storybook
+      - VITE_HOST=0.0.0.0
+      - STORYBOOK_HOST=0.0.0.0
     ports:
       - "5173:5173"
       - "6006:6006"
@@ -21,12 +21,10 @@ services:
     volumes:
       - ./backend/metrics:/app
     ports:
-      - "8080:8080"
-      - "40000:40000"
+      - "3000:3000"
+      - "4200:4200"
     networks:
       - sanctum_internal
-    environment:
-      - PORT=8080
 
   db:
     image: postgres:16
@@ -46,5 +44,4 @@ networks:
   sanctum_internal:
 
 volumes:
-#  web_data:
-  postgres_data:
+  postgres_data: {}

@@ -15,7 +15,7 @@
 
 <fieldset class={`flex flex-col  ${className}`}>
 	<div class="p-3">
-		<legend class="mb-4 text-sm leading-none font-semibold select-none">{legend}</legend>
+		<legend class="mb-2 text-sm leading-none font-semibold select-none">{legend}</legend>
 
 		<div class="flex flex-row gap-2">
 			{#each options as option (option.id)}

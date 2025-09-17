@@ -15,5 +15,5 @@ func main() {
 	s := server.New()
 	defer s.Shutdown()
 
-	log.Fatal(s.Echo.Start("0.0.0.0:4200"))
+	log.Fatal(s.Echo.Start("0.0.0.0:3000"))
 }
