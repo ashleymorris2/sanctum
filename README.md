@@ -11,8 +11,6 @@ Track habits, health, and productivity in one place. Some examples include:
 
 Sanctum aims to provide insight into daily patterns and long-term trends, the mission is to take back ownership of personal data that is often siloed into many different walled gardens. 
 
----
-
 ## Features (Planned & In Progress)
  - Unified dashboard for personal metrics
  - API ingestion from external providers
@@ -22,6 +20,14 @@ Sanctum aims to provide insight into daily patterns and long-term trends, the mi
  - Self-hosted deployment via Docker Compose
  - Privacy-focused local storage (no cloud dependencies)
 
----
-
 ## Tech Stack
+### Backend
+ - Go | _API, Auth_
+	- Echo (routing, middleware)
+### Frontend
+- Sveltekit | _Frontend_
+	- Tailwind, DaisyUI (Styling)
+### Data
+- Postgres | _Relational Storage_
+	- SQLC (code generate from Schema)
+	- Goode (migrations)
