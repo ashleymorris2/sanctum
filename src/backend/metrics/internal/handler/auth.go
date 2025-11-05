@@ -36,7 +36,7 @@ func (a *Auth) Login(c echo.Context) error {
 
 	authResult, err := a.authProvider.Authenticate(ctx, req.Email, req.Password)
 	if err != nil {
-		if errors.Is(err, auth.ErrAuthFailure) {
+		if errors.Is(err, auth.ErrInvalidCredentials) {
 			return echo.NewHTTPError(http.StatusUnauthorized, ErrorResponse{
 				Message: "Invalid credentials",
 			})
@@ -56,7 +56,7 @@ func (a *Auth) Login(c echo.Context) error {
 }
 
 func (a *Auth) VerifyAuthToken(c echo.Context) error {
-	token, err := tokens.JwtTokenFromHeader(c.Request())
+	token, err := auth.JwtTokenFromHeader(c.Request())
 	if err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, "Missing or invalid token")
 	}

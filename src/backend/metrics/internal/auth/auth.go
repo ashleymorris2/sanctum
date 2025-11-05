@@ -21,14 +21,11 @@ import (
 //	    auth.WithAuthTokenTTL(24 * time.Hour),
 //	)
 func ByCredentials(queries *sqlc.Queries, refreshTokenRepo repositories.RefreshTokenRepository, jwtSecret []byte) *CredentialService {
-
 	authTokenTTL := 15 * time.Minute       // 15 min
 	refreshTokenTTL := 28 * 24 * time.Hour // 28 days
-
 	s := &CredentialService{
 		queries:      queries,
 		tokenService: newTokenService(jwtSecret, authTokenTTL, refreshTokenTTL, refreshTokenRepo),
 	}
-
 	return s
 }

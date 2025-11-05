@@ -7,18 +7,11 @@ import (
 	"github.com/google/uuid"
 )
 
-// CredentialAuthResult represents the result of an authentication operation using credentials.
-// It includes the authenticated user's ID, JWT access token, a refresh token for session renewal, and the user's email.
-type CredentialAuthResult struct {
+// SessionResult represents a complete authenticated session with tokens
+type SessionResult struct {
 	UserID    string
 	Email     string
 	TokenPair *TokenPair
-}
-
-// RefreshTokenInfo contains validated refresh token information
-type RefreshTokenInfo struct {
-	UserID    uuid.UUID
-	ExpiresAt time.Time
 }
 
 // TokenPair represents a JWT access token and refresh token pair
@@ -27,4 +20,16 @@ type TokenPair struct {
 	AccessTokenTTL  time.Duration
 	RefreshToken    model.RefreshToken
 	RefreshTokenTTL time.Duration
+}
+
+// authResult represents the result of authentication (identity only)
+type authResult struct {
+	UserID string
+	Email  string
+}
+
+// refreshTokenInfo contains validated refresh token information
+type refreshTokenInfo struct {
+	UserID    uuid.UUID
+	ExpiresAt time.Time
 }

@@ -104,7 +104,7 @@ func (m *tokenService) storeRefreshToken(ctx context.Context, token model.Refres
 	return m.refreshTokenRepo.InsertRefreshToken(ctx, token, userID, m.refreshTTL)
 }
 
-func (m *tokenService) validateRefreshToken(ctx context.Context, refreshToken model.RefreshToken) (*RefreshTokenInfo, error) {
+func (m *tokenService) validateRefreshToken(ctx context.Context, refreshToken model.RefreshToken) (*refreshTokenInfo, error) {
 	// Retrieve the refresh token
 	storedToken, err := m.refreshTokenRepo.GetRefreshToken(ctx, refreshToken)
 	if err != nil {
@@ -125,7 +125,7 @@ func (m *tokenService) validateRefreshToken(ctx context.Context, refreshToken mo
 		return nil, ErrExpiredRefreshToken
 	}
 
-	return &RefreshTokenInfo{
+	return &refreshTokenInfo{
 		UserID:    storedToken.UserID,
 		ExpiresAt: storedToken.ExpiresAt,
 	}, nil

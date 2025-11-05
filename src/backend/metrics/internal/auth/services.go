@@ -11,8 +11,8 @@ import (
 )
 
 type Service interface {
-	Register(ctx context.Context, email, password string) (*CredentialAuthResult, error)
-	Authenticate(ctx context.Context, email, password string) (*CredentialAuthResult, error)
+	Register(ctx context.Context, email, password string) (*authResult, error)
+	Authenticate(ctx context.Context, email, password string) (*authResult, error)
 }
 
 // CredentialService handles user authentication and registration using basic email-password credentials.
@@ -23,7 +23,7 @@ type CredentialService struct {
 	tokenService *tokenService
 }
 
-func (s *CredentialService) Register(ctx context.Context, email, password string) (*CredentialAuthResult, error) {
+func (s *CredentialService) Register(ctx context.Context, email, password string) (*SessionResult, error) {
 	if email == "" || password == "" {
 		return nil, ErrEmptyCredentials
 	}
@@ -47,14 +47,14 @@ func (s *CredentialService) Register(ctx context.Context, email, password string
 		return nil, err
 	}
 
-	return &CredentialAuthResult{
+	return &SessionResult{
 		UserID:    user.ID.String(),
 		Email:     user.Email,
 		TokenPair: tokenPair,
 	}, nil
 }
 
-func (s *CredentialService) Authenticate(ctx context.Context, email, password string) (*CredentialAuthResult, error) {
+func (s *CredentialService) Authenticate(ctx context.Context, email, password string) (*SessionResult, error) {
 	user, err := s.queries.GetUserByEmail(ctx, email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -74,7 +74,7 @@ func (s *CredentialService) Authenticate(ctx context.Context, email, password st
 		return nil, err
 	}
 
-	return &CredentialAuthResult{
+	return &SessionResult{
 		UserID:    user.ID.String(),
 		Email:     user.Email,
 		TokenPair: tokenPair,
