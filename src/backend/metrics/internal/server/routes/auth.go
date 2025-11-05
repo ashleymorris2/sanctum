@@ -1,9 +1,10 @@
 package routes
 
 import (
-	"github.com/labstack/echo/v4"
 	"metrics/internal/auth"
 	"metrics/internal/handler"
+
+	"github.com/labstack/echo/v4"
 )
 
 func RegisterAuthFor(g *echo.Group, provider auth.Provider) {

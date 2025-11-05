@@ -4,12 +4,12 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
-	"github.com/google/uuid"
 	"strings"
+
+	"github.com/google/uuid"
 )
 
-// RefreshToken represents a string-based token used for securely refreshing
-// authentication sessions.
+// RefreshToken represents a string-based token used for securely refreshing authentication sessions.
 type RefreshToken string
 
 // NewRefreshToken validates and creates a new RefreshToken instance from the input string.
@@ -21,7 +21,8 @@ func NewRefreshToken(tokenID uuid.UUID, token string) RefreshToken {
 	return RefreshToken(s)
 }
 
-// ParseRefreshToken validates the format of the input string and converts it into a RefreshToken if valid, or returns an error.
+// ParseRefreshToken validates the format of the input string and converts it into a RefreshToken if valid,
+// or returns an error.
 func ParseRefreshToken(s string) (RefreshToken, error) {
 	if !isValidRefreshToken(s) {
 		return "", fmt.Errorf("invalid refresh token format")

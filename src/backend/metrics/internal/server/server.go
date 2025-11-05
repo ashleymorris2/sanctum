@@ -3,8 +3,6 @@ package server
 import (
 	"context"
 	"database/sql"
-	"github.com/labstack/echo/v4"
-	_ "github.com/lib/pq"
 	"log"
 	"metrics/internal/auth"
 	"metrics/internal/db"
@@ -15,6 +13,9 @@ import (
 	"metrics/internal/validators"
 	"os"
 	"time"
+
+	"github.com/labstack/echo/v4"
+	_ "github.com/lib/pq"
 )
 
 type Server struct {

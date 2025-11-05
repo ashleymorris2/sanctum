@@ -2,12 +2,14 @@ package handler
 
 import (
 	"errors"
-	"github.com/labstack/echo/v4"
 	"metrics/internal/auth"
+
 	"metrics/internal/dto"
 	"metrics/internal/model"
 	"metrics/internal/validators"
 	"net/http"
+
+	"github.com/labstack/echo/v4"
 )
 
 const secureCookie = false
@@ -54,7 +56,7 @@ func (a *Auth) Login(c echo.Context) error {
 }
 
 func (a *Auth) VerifyAuthToken(c echo.Context) error {
-	token, err := auth.JwtTokenFromHeader(c.Request())
+	token, err := tokens.JwtTokenFromHeader(c.Request())
 	if err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, "Missing or invalid token")
 	}

@@ -2,27 +2,16 @@ package auth
 
 import (
 	"context"
-	"crypto/subtle"
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/golang-jwt/jwt/v5"
-	"golang.org/x/crypto/bcrypt"
 	"metrics/internal/db/repositories"
 	"metrics/internal/db/sqlc"
 
+	"golang.org/x/crypto/bcrypt"
+
 	"metrics/internal/model"
 	"time"
-)
-
-var (
-	ErrAuthFailure            = errors.New("invalid credentials")
-	ErrDatabaseFailure        = errors.New("database error during authentication")
-	ErrInvalidJwtToken        = errors.New("invalid token")
-	ErrJwtTokenGeneration     = errors.New("failed to generate authentication token")
-	ErrRefreshTokenGeneration = errors.New("failed to generate refresh token")
-	ErrInvalidRefreshToken    = errors.New("invalid refresh token")
-	ErrExpiredRefreshToken    = errors.New("refresh token has expired")
 )
 
 // CredentialAuthResult represents the result of an authentication operation using credentials.
@@ -72,7 +61,7 @@ func WithRefreshTokenTTL(d time.Duration) Option {
 // Example:
 //
 //	// Create a provider with custom token timeout
-//	provider := auth.ByCredentials(
+//	provider: = auth.ByCredentials(
 //	    queries,
 //	    []byte("your-jwt-secret"),
 //	    auth.WithAuthTokenTTL(24 * time.Hour),
@@ -131,103 +120,103 @@ func (cs *CredentialService) Authenticate(ctx context.Context, email, password s
 	return cs.issueTokenPair(ctx, user, nil)
 }
 
-func (cs *CredentialService) ValidateJwtToken(jwtToken model.JWTToken) (jwt.MapClaims, error) {
-	// Parse the token
-	token, err := jwt.Parse(jwtToken.String(), func(token *jwt.Token) (interface{}, error) {
-		// Validate the signing method
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, ErrInvalidJwtToken
-		}
-		return cs.jwtSecret, nil
-	})
+//func (cs *CredentialService) ValidateJwtToken(jwtToken model.JWTToken) (jwt.MapClaims, error) {
+//	// Parse the token
+//	token, err := jwt.Parse(jwtToken.String(), func(token *jwt.Token) (interface{}, error) {
+//		// Validate the signing method
+//		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+//			return nil, ErrInvalidJwtToken
+//		}
+//		return cs.jwtSecret, nil
+//	})
+//
+//	if err != nil {
+//		if errors.Is(err, jwt.ErrTokenExpired) {
+//			return nil, err
+//		}
+//		return nil, ErrInvalidJwtToken
+//	}
+//
+//	// Extract and validate claims
+//	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+//		return claims, nil
+//	}
+//
+//	return nil, ErrInvalidJwtToken
+//}
 
-	if err != nil {
-		if errors.Is(err, jwt.ErrTokenExpired) {
-			return nil, err
-		}
-		return nil, ErrInvalidJwtToken
-	}
+//func (cs *CredentialService) RefreshJwtToken(ctx context.Context, refreshToken model.RefreshToken) (*CredentialAuthResult, error) {
+//	token, err := cs.validateRefreshToken(ctx, refreshToken)
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	// Get the user
+//	user, err := cs.queries.GetUserById(ctx, token.UserID)
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	jwtToken, err := generateJWT(user.ID, cs.authTokenTTL, cs.jwtSecret)
+//	if err != nil {
+//		return nil, ErrJwtTokenGeneration
+//	}
+//
+//	return &CredentialAuthResult{
+//		UserID:          user.ID.String(),
+//		AuthToken:       jwtToken,
+//		AuthTokenTTL:    cs.authTokenTTL,
+//		RefreshToken:    refreshToken,
+//		RefreshTokenTTL: cs.refreshTokenTTL,
+//		Email:           user.Email,
+//	}, nil
+//}
 
-	// Extract and validate claims
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		return claims, nil
-	}
+//func (cs *CredentialService) validateRefreshToken(ctx context.Context, refreshToken model.RefreshToken) (*sqlc.RefreshToken, error) {
+//	// Retrieve the refresh token
+//	token, err := cs.refreshTokenRepo.GetRefreshToken(ctx, refreshToken)
+//	if err != nil {
+//		return nil, ErrInvalidRefreshToken
+//	}
+//
+//	if subtle.ConstantTimeCompare([]byte(token.Token), []byte(refreshToken.Hashed())) != 1 {
+//		return nil, errors.New("invalid token")
+//	}
+//
+//	// Check if the token is revoked
+//	if token.Revoked {
+//		return nil, ErrInvalidRefreshToken
+//	}
+//
+//	// Check if the token has expired
+//	if time.Now().After(token.ExpiresAt) {
+//		return nil, ErrExpiredRefreshToken
+//	}
+//
+//	return token, nil
+//}
 
-	return nil, ErrInvalidJwtToken
-}
-
-func (cs *CredentialService) RefreshJwtToken(ctx context.Context, refreshToken model.RefreshToken) (*CredentialAuthResult, error) {
-	token, err := cs.validateRefreshToken(ctx, refreshToken)
-	if err != nil {
-		return nil, err
-	}
-
-	// Get the user
-	user, err := cs.queries.GetUserById(ctx, token.UserID)
-	if err != nil {
-		return nil, err
-	}
-
-	jwtToken, err := generateJWT(user.ID, cs.authTokenTTL, cs.jwtSecret)
-	if err != nil {
-		return nil, ErrJwtTokenGeneration
-	}
-
-	return &CredentialAuthResult{
-		UserID:          user.ID.String(),
-		AuthToken:       jwtToken,
-		AuthTokenTTL:    cs.authTokenTTL,
-		RefreshToken:    refreshToken,
-		RefreshTokenTTL: cs.refreshTokenTTL,
-		Email:           user.Email,
-	}, nil
-}
-
-func (cs *CredentialService) validateRefreshToken(ctx context.Context, refreshToken model.RefreshToken) (*sqlc.RefreshToken, error) {
-	// Retrieve the refresh token
-	token, err := cs.refreshTokenRepo.GetRefreshToken(ctx, refreshToken)
-	if err != nil {
-		return nil, ErrInvalidRefreshToken
-	}
-
-	if subtle.ConstantTimeCompare([]byte(token.Token), []byte(refreshToken.Hashed())) != 1 {
-		return nil, errors.New("invalid token")
-	}
-
-	// Check if the token is revoked
-	if token.Revoked {
-		return nil, ErrInvalidRefreshToken
-	}
-
-	// Check if the token has expired
-	if time.Now().After(token.ExpiresAt) {
-		return nil, ErrExpiredRefreshToken
-	}
-
-	return token, nil
-}
-
-func (cs *CredentialService) issueTokenPair(ctx context.Context, user sqlc.User, refreshToken *model.RefreshToken) (*CredentialAuthResult, error) {
-	jwtToken, err := generateJWT(user.ID, cs.authTokenTTL, cs.jwtSecret)
-	if err != nil {
-		return nil, ErrJwtTokenGeneration
-	}
-
-	newRefreshToken, err := generateRefreshToken(cs.refreshTokenTTL)
-	if err != nil {
-		return nil, ErrRefreshTokenGeneration
-	}
-
-	if err := cs.refreshTokenRepo.InsertRefreshToken(ctx, newRefreshToken, user.ID, cs.refreshTokenTTL); err != nil {
-		return nil, fmt.Errorf("%s: %v", ErrDatabaseFailure, err)
-	}
-
-	return &CredentialAuthResult{
-		UserID:          user.ID.String(),
-		AuthToken:       jwtToken,
-		AuthTokenTTL:    cs.authTokenTTL,
-		RefreshToken:    newRefreshToken,
-		RefreshTokenTTL: cs.refreshTokenTTL,
-		Email:           user.Email,
-	}, nil
-}
+//func (cs *CredentialService) issueTokenPair(ctx context.Context, user sqlc.User, refreshToken *model.RefreshToken) (*CredentialAuthResult, error) {
+//	jwtToken, err := generateJWT(user.ID, cs.authTokenTTL, cs.jwtSecret)
+//	if err != nil {
+//		return nil, ErrJwtTokenGeneration
+//	}
+//
+//	newRefreshToken, err := generateRefreshToken(cs.refreshTokenTTL)
+//	if err != nil {
+//		return nil, ErrRefreshTokenGeneration
+//	}
+//
+//	if err := cs.refreshTokenRepo.InsertRefreshToken(ctx, newRefreshToken, user.ID, cs.refreshTokenTTL); err != nil {
+//		return nil, fmt.Errorf("%s: %v", ErrDatabaseFailure, err)
+//	}
+//
+//	return &CredentialAuthResult{
+//		UserID:          user.ID.String(),
+//		AuthToken:       jwtToken,
+//		AuthTokenTTL:    cs.authTokenTTL,
+//		RefreshToken:    newRefreshToken,
+//		RefreshTokenTTL: cs.refreshTokenTTL,
+//		Email:           user.Email,
+//	}, nil
+//}

@@ -1,15 +1,16 @@
 package main
 
 import (
-	"github.com/joho/godotenv"
 	"log"
 	"metrics/internal/server"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Printf("Warning: Message loading .env file: %v", err)
+		log.Printf("Warning: Error loading .env file: %v", err)
 	}
 
 	s := server.New()
