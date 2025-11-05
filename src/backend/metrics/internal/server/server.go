@@ -44,7 +44,7 @@ func New() *Server {
 	}
 }
 
-func configureAuth(queries *sqlc.Queries) auth.Provider {
+func configureAuth(queries *sqlc.Queries) auth.Service {
 	return auth.ByCredentials(
 		queries,
 		*repositories.NewRefreshTokenRepository(queries),

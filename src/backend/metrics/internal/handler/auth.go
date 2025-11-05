@@ -15,10 +15,10 @@ import (
 const secureCookie = false
 
 type Auth struct {
-	authProvider auth.Provider
+	authProvider auth.Service
 }
 
-func NewAuth(authProvider auth.Provider) *Auth {
+func NewAuth(authProvider auth.Service) *Auth {
 	return &Auth{authProvider: authProvider}
 }
 
@@ -48,7 +48,7 @@ func (a *Auth) Login(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, dto.LoginResponse{
-		AuthToken:       authResult.AuthToken.String(),
+		AuthToken:       authResult.AccessToken.String(),
 		RefreshToken:    authResult.RefreshToken.String(),
 		RefreshTokenTTL: authResult.RefreshTokenTTL.Seconds(),
 		UserId:          authResult.UserID,

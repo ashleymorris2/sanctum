@@ -16,32 +16,6 @@ import (
 	"github.com/google/uuid"
 )
 
-var (
-	ErrInvalidJWTToken = errors.New("invalid JWT token")
-	ErrExpiredJWTToken = errors.New("JWT token has expired")
-	ErrJWTGeneration   = errors.New("failed to generate JWT token")
-	ErrInvalidUserID   = errors.New("userID cannot be nil")
-
-	ErrInvalidRefreshToken = errors.New("invalid refresh token")
-	ErrExpiredRefreshToken = errors.New("refresh token has expired")
-	ErrRevokedRefreshToken = errors.New("refresh token has been revoked")
-	ErrRefreshGeneration   = errors.New("failed to generate refresh token")
-)
-
-// RefreshTokenInfo contains validated refresh token information
-type RefreshTokenInfo struct {
-	UserID    uuid.UUID
-	ExpiresAt time.Time
-}
-
-// TokenPair represents a JWT access token and refresh token pair
-type TokenPair struct {
-	AccessToken     model.JWTToken
-	AccessTokenTTL  time.Duration
-	RefreshToken    model.RefreshToken
-	RefreshTokenTTL time.Duration
-}
-
 type tokenService struct {
 	jwtSecret        []byte
 	jwtTTL           time.Duration

@@ -7,7 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func RegisterAuthFor(g *echo.Group, provider auth.Provider) {
+func RegisterAuthFor(g *echo.Group, provider auth.Service) {
 	h := handler.NewAuth(provider)
 
 	g.POST("/login", h.Login)
