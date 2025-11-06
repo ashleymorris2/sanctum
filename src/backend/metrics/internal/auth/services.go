@@ -2,81 +2,95 @@ package auth
 
 import (
 	"context"
-	"database/sql"
-	"errors"
-	"fmt"
-	"metrics/internal/db/sqlc"
+	"metrics/internal/model"
 
-	"golang.org/x/crypto/bcrypt"
+	"github.com/google/uuid"
 )
-
-type Service interface {
-	Register(ctx context.Context, email, password string) (*authResult, error)
-	Authenticate(ctx context.Context, email, password string) (*authResult, error)
-}
 
 // CredentialService handles user authentication and registration using basic email-password credentials.
 // It hashes passwords using bcrypt, interacts with the database to persist user records, and generates JWT tokens
 // for session management. It relies on sqlc.Queries for database operations and supports configurable JWT timeouts.
-type CredentialService struct {
-	queries      *sqlc.Queries
+type credentialService struct {
+	provider     credentialAuthProvider
 	tokenService *tokenService
 }
 
-func (s *CredentialService) Register(ctx context.Context, email, password string) (*SessionResult, error) {
-	if email == "" || password == "" {
-		return nil, ErrEmptyCredentials
+func newCredentialService(provider credentialAuthProvider, tokenService *tokenService) CredentialService {
+	return &credentialService{
+		provider:     provider,
+		tokenService: tokenService,
 	}
+}
 
-	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+func (s *credentialService) Register(ctx context.Context, credentials EmailPasswordCredentials) (*SessionResult, error) {
+	authResult, err := s.provider.registerWithCredentials(ctx, credentials)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %v", ErrHashingFailed, err)
+		return nil, err
 	}
 
-	user, err := s.queries.CreateUser(ctx, sqlc.CreateUserParams{
-		Email:        email,
-		PasswordHash: string(hash),
-	})
-
-	if err != nil {
-		return nil, fmt.Errorf("%w: %v", ErrDatabaseError, err)
-	}
-
-	tokenPair, err := s.tokenService.generateTokenPair(ctx, user.ID)
+	tokenPair, err := s.tokenService.generateTokenPair(ctx, authResult.userID)
 	if err != nil {
 		return nil, err
 	}
 
 	return &SessionResult{
-		UserID:    user.ID.String(),
-		Email:     user.Email,
+		UserID:    authResult.userID.String(),
+		Email:     authResult.email,
 		TokenPair: tokenPair,
 	}, nil
 }
 
-func (s *CredentialService) Authenticate(ctx context.Context, email, password string) (*SessionResult, error) {
-	user, err := s.queries.GetUserByEmail(ctx, email)
+func (s *credentialService) Login(ctx context.Context, creds EmailPasswordCredentials) (*SessionResult, error) {
+	authResult, err := s.provider.authenticateWithCredentials(ctx, creds)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			// User doesn't exist
-			return nil, ErrInvalidCredentials
-		}
-		// This is a database/infrastructure error, not an authentication error
-		return nil, fmt.Errorf("%s: %v", ErrDatabaseError, err)
+		return nil, err
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password)); err != nil {
-		return nil, ErrInvalidCredentials
-	}
-
-	tokenPair, err := s.tokenService.generateTokenPair(ctx, user.ID)
+	tokenPair, err := s.tokenService.generateTokenPair(ctx, authResult.userID)
 	if err != nil {
 		return nil, err
 	}
 
 	return &SessionResult{
-		UserID:    user.ID.String(),
-		Email:     user.Email,
+		UserID:    authResult.userID.String(),
+		Email:     authResult.email,
 		TokenPair: tokenPair,
 	}, nil
+}
+
+func (s *credentialService) RefreshSession(ctx context.Context, refreshToken model.RefreshToken) (*TokenPair, error) {
+	tokenPair, err := s.tokenService.renewTokenPair(ctx, refreshToken)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = s.tokenService.validateJWT(tokenPair.AccessToken)
+	if err != nil {
+		return nil, err
+	}
+
+	return tokenPair, nil
+}
+
+func (s *credentialService) ValidateToken(token model.JWTToken) (uuid.UUID, error) {
+	claims, err := s.tokenService.validateJWT(token)
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	subStr, ok := claims["sub"].(string)
+	if !ok {
+		return uuid.Nil, ErrInvalidJWTToken
+	}
+
+	userID, err := uuid.Parse(subStr)
+	if err != nil {
+		return uuid.Nil, ErrInvalidJWTToken
+	}
+
+	return userID, nil
+}
+
+func (s *credentialService) Logout(ctx context.Context, refreshToken model.RefreshToken) error {
+	return s.tokenService.revokeRefreshToken(ctx, refreshToken)
 }

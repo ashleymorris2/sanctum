@@ -91,7 +91,7 @@ func (q *Queries) InvalidateAllTokensForUser(ctx context.Context, userID uuid.UU
 	return err
 }
 
-const invalidateRefreshToken = `-- name: InvalidateRefreshToken :exec
+const invalidateRefreshToken = `-- name: RevokeRefreshToken :exec
 UPDATE refresh_tokens
 SET revoked = true
 WHERE token = $1

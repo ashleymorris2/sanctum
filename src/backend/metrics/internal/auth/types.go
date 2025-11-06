@@ -7,6 +7,12 @@ import (
 	"github.com/google/uuid"
 )
 
+// EmailPasswordCredentials represents email/password authentication
+type EmailPasswordCredentials struct {
+	Email    string
+	Password string
+}
+
 // SessionResult represents a complete authenticated session with tokens
 type SessionResult struct {
 	UserID    string
@@ -24,12 +30,12 @@ type TokenPair struct {
 
 // authResult represents the result of authentication (identity only)
 type authResult struct {
-	UserID string
-	Email  string
+	userID uuid.UUID
+	email  string
 }
 
 // refreshTokenInfo contains validated refresh token information
 type refreshTokenInfo struct {
-	UserID    uuid.UUID
-	ExpiresAt time.Time
+	userID    uuid.UUID
+	expiresAt time.Time
 }

@@ -46,7 +46,7 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 		return nil, fmt.Errorf("error preparing query InvalidateAllTokensForUser: %w", err)
 	}
 	if q.invalidateRefreshTokenStmt, err = db.PrepareContext(ctx, invalidateRefreshToken); err != nil {
-		return nil, fmt.Errorf("error preparing query InvalidateRefreshToken: %w", err)
+		return nil, fmt.Errorf("error preparing query RevokeRefreshToken: %w", err)
 	}
 	if q.invalidateRefreshTokenByIdStmt, err = db.PrepareContext(ctx, invalidateRefreshTokenById); err != nil {
 		return nil, fmt.Errorf("error preparing query InvalidateRefreshTokenById: %w", err)

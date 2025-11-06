@@ -2,18 +2,24 @@ package middleware
 
 import (
 	"metrics/internal/auth"
-	"metrics/internal/auth/tokens"
+
 	"metrics/internal/model"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
 
+// AuthMiddleware creates Echo middleware for JWT authentication
+// Accepts any auth service that can validate tokens (CredentialService, OAuthService, APIKeyService)
 func AuthMiddleware(config auth.MiddlewareConfig) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 
-			token, _ := tokens.JwtTokenFromHeader(c.Request())
+			jwtToken, err := auth.jwtFromHeader(c.Request())
+			if err != nil {
+				return echo.NewHTTPError(http.StatusUnauthorized, "Missing or invalid authorization header")
+			}
+
 			if userID, ok := validateAccessToken(token.String(), config); ok {
 				// Set userID in context for use in handler
 				c.Set("userID", userID)

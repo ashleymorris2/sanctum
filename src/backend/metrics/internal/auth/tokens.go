@@ -126,8 +126,8 @@ func (m *tokenService) validateRefreshToken(ctx context.Context, refreshToken mo
 	}
 
 	return &refreshTokenInfo{
-		UserID:    storedToken.UserID,
-		ExpiresAt: storedToken.ExpiresAt,
+		userID:    storedToken.UserID,
+		expiresAt: storedToken.ExpiresAt,
 	}, nil
 }
 
@@ -167,7 +167,7 @@ func (m *tokenService) renewTokenPair(ctx context.Context, refreshToken model.Re
 	}
 
 	// Generate new JWT
-	jwtToken, err := m.generateJWT(info.UserID)
+	jwtToken, err := m.generateJWT(info.userID)
 	if err != nil {
 		return nil, err
 	}
@@ -180,8 +180,46 @@ func (m *tokenService) renewTokenPair(ctx context.Context, refreshToken model.Re
 	}, nil
 }
 
-// JWTFromHeader extracts a JWT token from the Authorization header
-func JWTFromHeader(req *http.Request) (model.JWTToken, error) {
+// revokeRefreshToken marks a refresh token as invalid
+func (m *tokenService) revokeRefreshToken(ctx context.Context, refreshToken model.RefreshToken) error {
+	return m.refreshTokenRepo.RevokeRefreshToken(ctx, refreshToken)
+}
+
+type TokenValidator struct {
+	tokenService *tokenService
+}
+
+// NewTokenValidator creates a public token validator
+// This is exported so it can be used independently of auth services
+func NewTokenValidator(jwtSecret []byte) *TokenValidator {
+	// Create a minimal token service just for validation
+	ts := &tokenService{
+		jwtSecret: jwtSecret,
+	}
+	return &TokenValidator{tokenService: ts}
+}
+
+// ValidateToken validates a JWT token and returns the user ID
+func (v *TokenValidator) ValidateToken(token model.JWTToken) (uuid.UUID, error) {
+	claims, err := v.tokenService.validateJWT(token)
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	return uuid.Parse(claims["sub"].(string))
+}
+
+// ValidateTokenFromHeader extracts and validates a JWT from an HTTP request
+func (v *TokenValidator) ValidateTokenFromHeader(req *http.Request) (uuid.UUID, error) {
+	token, err := jwtFromHeader(req)
+	if err != nil {
+		return uuid.Nil, err
+	}
+	return v.ValidateToken(token)
+}
+
+// jwtFromHeader extracts a JWT token from the Authorization header
+func jwtFromHeader(req *http.Request) (model.JWTToken, error) {
 	authHeader := req.Header.Get("Authorization")
 
 	if authHeader != "" && strings.HasPrefix(authHeader, "Bearer ") {
