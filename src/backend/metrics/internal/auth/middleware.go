@@ -1,9 +1,9 @@
 package auth
 
 type MiddlewareConfig struct {
-	AuthProvider Service
+	AuthProvider CredentialService
 }
 
-func NewMiddlewareConfig(authProvider Service) MiddlewareConfig {
+func NewMiddlewareConfig(authProvider CredentialService) MiddlewareConfig {
 	return MiddlewareConfig{AuthProvider: authProvider}
 }

@@ -9,6 +9,16 @@ import (
 	"github.com/google/uuid"
 )
 
+type JWTToken string
+
+func NewJWTToken(s string) JWTToken {
+	return JWTToken(s)
+}
+
+func (t JWTToken) String() string {
+	return string(t)
+}
+
 // RefreshToken represents a string-based token used for securely refreshing authentication sessions.
 type RefreshToken string
 

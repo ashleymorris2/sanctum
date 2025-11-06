@@ -15,12 +15,12 @@ func AuthMiddleware(config auth.MiddlewareConfig) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 
-			jwtToken, err := auth.jwtFromHeader(c.Request())
+			jwtToken, err := auth.JWTFromHeader(c.Request())
 			if err != nil {
 				return echo.NewHTTPError(http.StatusUnauthorized, "Missing or invalid authorization header")
 			}
 
-			if userID, ok := validateAccessToken(token.String(), config); ok {
+			if userID, ok := validateAccessToken(jwtToken, config); ok {
 				// Set userID in context for use in handler
 				c.Set("userID", userID)
 				return next(c)
@@ -31,13 +31,8 @@ func AuthMiddleware(config auth.MiddlewareConfig) echo.MiddlewareFunc {
 	}
 }
 
-func validateAccessToken(token string, config auth.MiddlewareConfig) (userID string, valid bool) {
-	credentialAuth, ok := config.AuthProvider.(*auth.CredentialService)
-	if !ok {
-		return "", false
-	}
-
-	claims, err := credentialAuth.ValidateJwtToken(model.JWTToken(token))
+func validateAccessToken(token model.JWTToken, config auth.MiddlewareConfig) (userID string, valid bool) {
+	claims, err := config.AuthProvider.ValidateToken(model.JWTToken(token))
 	if err != nil {
 		return "", false
 	}

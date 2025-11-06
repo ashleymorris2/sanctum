@@ -7,6 +7,5 @@ type RefreshTokenRequest struct {
 
 // RefreshTokenResponse represents the response after a successful token refresh
 type RefreshTokenResponse struct {
-	AuthToken string `json:"authToken"`
-	UserId    string `json:"userId"`
+	AccessToken string `json:"accessToken"`
 }

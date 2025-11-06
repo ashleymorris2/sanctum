@@ -17,8 +17,7 @@ import (
 //	// Create a provider with custom token timeout
 //	provider: = auth.ByCredentials(
 //	    queries,
-//	    []byte("your-jwt-secret"),
-//	    auth.WithAuthTokenTTL(24 * time.Hour),
+//	    []byte("jwt-secret"),
 //	)
 func ByCredentials(queries *sqlc.Queries, refreshTokenRepo repositories.RefreshTokenRepository, jwtSecret []byte) CredentialService {
 	authTokenTTL := 15 * time.Minute       // 15 min
@@ -28,5 +27,4 @@ func ByCredentials(queries *sqlc.Queries, refreshTokenRepo repositories.RefreshT
 	tokenService := newTokenService(jwtSecret, authTokenTTL, refreshTokenTTL, refreshTokenRepo)
 
 	return newCredentialService(provider, tokenService)
-
 }

@@ -4,9 +4,16 @@ import (
 	"log"
 	"metrics/internal/server"
 
+	_ "metrics/docs"
+
 	"github.com/joho/godotenv"
+	_ "github.com/swaggo/echo-swagger"
 )
 
+// @title Metrics API
+// @version 1.0
+// @description API for uploading of metric data
+// @BasePath /api
 func main() {
 	err := godotenv.Load()
 	if err != nil {

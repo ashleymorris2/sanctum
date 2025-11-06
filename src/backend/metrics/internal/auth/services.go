@@ -4,7 +4,7 @@ import (
 	"context"
 	"metrics/internal/model"
 
-	"github.com/google/uuid"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 // CredentialService handles user authentication and registration using basic email-password credentials.
@@ -72,23 +72,23 @@ func (s *credentialService) RefreshSession(ctx context.Context, refreshToken mod
 	return tokenPair, nil
 }
 
-func (s *credentialService) ValidateToken(token model.JWTToken) (uuid.UUID, error) {
+func (s *credentialService) ValidateToken(token model.JWTToken) (jwt.MapClaims, error) {
 	claims, err := s.tokenService.validateJWT(token)
 	if err != nil {
-		return uuid.Nil, err
+		return nil, err
 	}
 
-	subStr, ok := claims["sub"].(string)
-	if !ok {
-		return uuid.Nil, ErrInvalidJWTToken
-	}
+	//subject, err := claims.GetSubject()
+	//if err != nil {
+	//	return uuid.Nil, ErrInvalidJWTToken
+	//}
+	//
+	//userID, err := uuid.Parse(subject)
+	//if err != nil {
+	//	return uuid.Nil, ErrInvalidJWTToken
+	//}
 
-	userID, err := uuid.Parse(subStr)
-	if err != nil {
-		return uuid.Nil, ErrInvalidJWTToken
-	}
-
-	return userID, nil
+	return claims, nil
 }
 
 func (s *credentialService) Logout(ctx context.Context, refreshToken model.RefreshToken) error {

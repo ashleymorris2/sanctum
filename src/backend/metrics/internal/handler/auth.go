@@ -14,15 +14,27 @@ import (
 
 const secureCookie = false
 
-type Auth struct {
-	authProvider auth.Service
+type AuthHandler struct {
+	authProvider auth.CredentialService
 }
 
-func NewAuth(authProvider auth.Service) *Auth {
-	return &Auth{authProvider: authProvider}
+func NewAuthHandler(authProvider auth.CredentialService) *AuthHandler {
+	return &AuthHandler{authProvider: authProvider}
 }
 
-func (a *Auth) Login(c echo.Context) error {
+// Login authenticates a user and returns access and refresh tokens
+// @Summary      User login
+// @Description  Authenticate a user with their email and password
+// @Tags         authentication
+// @Accept       json
+// @Produce      json
+// @Param        request body dto.LoginRequestDoc true "Login credentials"
+// @Success      200  {object}  dto.LoginResponse
+// @Failure      400  {object}  ErrorResponse
+// @Failure      401  {object}  ErrorResponse
+// @Failure      500  {object}  ErrorResponse
+// @Router       /auth/login [post]
+func (a *AuthHandler) Login(c echo.Context) error {
 	ctx := c.Request().Context()
 
 	var req dto.LoginRequest
@@ -34,7 +46,11 @@ func (a *Auth) Login(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, validators.FormatErrors(err))
 	}
 
-	authResult, err := a.authProvider.Authenticate(ctx, req.Email, req.Password)
+	authResult, err := a.authProvider.Login(ctx, auth.EmailPasswordCredentials{
+		Email:    req.Email,
+		Password: req.Password,
+	})
+
 	if err != nil {
 		if errors.Is(err, auth.ErrInvalidCredentials) {
 			return echo.NewHTTPError(http.StatusUnauthorized, ErrorResponse{
@@ -48,26 +64,20 @@ func (a *Auth) Login(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, dto.LoginResponse{
-		AuthToken:       authResult.AccessToken.String(),
-		RefreshToken:    authResult.RefreshToken.String(),
-		RefreshTokenTTL: authResult.RefreshTokenTTL.Seconds(),
+		AuthToken:       authResult.TokenPair.AccessToken.String(),
+		RefreshToken:    authResult.TokenPair.RefreshToken.String(),
+		RefreshTokenTTL: authResult.TokenPair.RefreshTokenTTL.Seconds(),
 		UserId:          authResult.UserID,
 	})
 }
 
-func (a *Auth) VerifyAuthToken(c echo.Context) error {
-	token, err := auth.JwtTokenFromHeader(c.Request())
+func (a *AuthHandler) VerifyAuthToken(c echo.Context) error {
+	token, err := auth.JWTFromHeader(c.Request())
 	if err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, "Missing or invalid token")
 	}
 
-	credentialService, ok := a.authProvider.(*auth.CredentialService)
-	if !ok {
-		//Not configured for credential auth
-		return echo.NewHTTPError(http.StatusInternalServerError, "`Internal server error`")
-	}
-
-	claims, err := credentialService.ValidateJwtToken(token)
+	claims, err := a.authProvider.ValidateToken(token)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, "Invalid or expired token")
 	}
@@ -82,27 +92,18 @@ func (a *Auth) VerifyAuthToken(c echo.Context) error {
 	})
 }
 
-func (a *Auth) RefreshAuthToken(c echo.Context) error {
-
+func (a *AuthHandler) RefreshAuthToken(c echo.Context) error {
 	cookie, err := c.Cookie("refresh_token")
 	if err != nil {
 		return c.JSON(http.StatusUnauthorized, "Invalid refresh token")
 	}
 
-	credentialService, ok := a.authProvider.(*auth.CredentialService)
-	if !ok {
-		//Not configured for credential auth
-		return echo.NewHTTPError(http.StatusInternalServerError, "Internal server error")
-	}
-
-	tokenPair, err := credentialService.RefreshJwtToken(c.Request().Context(), model.RefreshToken(cookie.Value))
+	tokenPair, err := a.authProvider.RefreshSession(c.Request().Context(), model.RefreshToken(cookie.Value))
 	if err != nil {
-		// Error handling...
 		return echo.NewHTTPError(http.StatusUnauthorized, "invalid token")
 	}
 
 	return c.JSON(http.StatusOK, dto.RefreshTokenResponse{
-		AuthToken: tokenPair.AuthToken.String(),
-		UserId:    tokenPair.UserID,
+		AccessToken: tokenPair.AccessToken.String(),
 	})
 }

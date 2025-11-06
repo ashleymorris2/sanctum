@@ -4,7 +4,7 @@ import (
 	"context"
 	"metrics/internal/model"
 
-	"github.com/google/uuid"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 // authProvider is the base interface that all providers implement
@@ -24,6 +24,6 @@ type CredentialService interface {
 	Login(ctx context.Context, credentials EmailPasswordCredentials) (*SessionResult, error)
 	Register(ctx context.Context, credentials EmailPasswordCredentials) (*SessionResult, error)
 	RefreshSession(ctx context.Context, refreshToken model.RefreshToken) (*TokenPair, error)
-	ValidateToken(token model.JWTToken) (uuid.UUID, error)
+	ValidateToken(token model.JWTToken) (jwt.MapClaims, error)
 	Logout(ctx context.Context, refreshToken model.RefreshToken) error
 }

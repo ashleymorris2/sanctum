@@ -46,3 +46,14 @@ tasks:
       AUTH_DATABASE_URL: '{{.DB_CONNECTION_STRING}}'
     cmds:
       - go run cmd/seed/main.go
+
+  swagger:generate:
+    desc: Generate swagger docs
+    dir: .
+    cmds:
+      - >
+        swag init
+        -g ./cmd/api/main.go
+        -o ./docs
+        --parseInternal
+        --parseDependency

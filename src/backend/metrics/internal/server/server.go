@@ -16,7 +16,12 @@ import (
 
 	"github.com/labstack/echo/v4"
 	_ "github.com/lib/pq"
+	echoSwagger "github.com/swaggo/echo-swagger"
 )
+
+// showSwagger is a flag to show swagger UI
+// todo: make it configurable via env
+const showSwagger = true
 
 type Server struct {
 	Echo *echo.Echo
@@ -31,6 +36,10 @@ func New() *Server {
 	e := echo.New()
 	e.Validator = validators.NewRequestValidator()
 
+	if showSwagger {
+		e.GET("/swagger/*", echoSwagger.WrapHandler)
+	}
+
 	public := e.Group("/api")
 	routes.RegisterAuthFor(public, authService)
 
@@ -44,7 +53,7 @@ func New() *Server {
 	}
 }
 
-func configureAuth(queries *sqlc.Queries) auth.Service {
+func configureAuth(queries *sqlc.Queries) auth.CredentialService {
 	return auth.ByCredentials(
 		queries,
 		*repositories.NewRefreshTokenRepository(queries),
