@@ -2,7 +2,7 @@ import { AUTH_API_BASE } from '$env/static/private';
 
 export async function verifyAuthToken(token: string) {
 	try {
-		const res = await fetch(`${AUTH_API_BASE}/api/verify`, {
+		const res = await fetch(`${AUTH_API_BASE}/api/auth/verify`, {
 			method: 'POST',
 			headers: { Authorization: `Bearer ${token}` }
 		});
@@ -15,7 +15,7 @@ export async function verifyAuthToken(token: string) {
 
 export async function refreshAuthToken(refreshToken: string) {
 	try {
-		const res = await fetch(`${AUTH_API_BASE}/api/refresh`, {
+		const res = await fetch(`${AUTH_API_BASE}/api/auth/refresh`, {
 			method: 'POST',
 			headers: { Cookie: `refresh_token=${refreshToken}` },
 			credentials: 'include'

@@ -10,10 +10,10 @@ import (
 	_ "github.com/swaggo/echo-swagger"
 )
 
-// @title Metrics API
-// @version 1.0
-// @description API for uploading of metric data
-// @BasePath /api
+// @title			Metrics API
+// @version		1.0
+// @description	API for uploading of metric data
+// @BasePath		/api
 func main() {
 	err := godotenv.Load()
 	if err != nil {

@@ -23,17 +23,18 @@ func NewAuthHandler(authProvider auth.CredentialService) *AuthHandler {
 }
 
 // Login authenticates a user and returns access and refresh tokens
-// @Summary      User login
-// @Description  Authenticate a user with their email and password
-// @Tags         authentication
-// @Accept       json
-// @Produce      json
-// @Param        request body dto.LoginRequestDoc true "Login credentials"
-// @Success      200  {object}  dto.LoginResponse
-// @Failure      400  {object}  ErrorResponse
-// @Failure      401  {object}  ErrorResponse
-// @Failure      500  {object}  ErrorResponse
-// @Router       /auth/login [post]
+//
+//	@Summary		User login
+//	@Description	Authenticate a user with their email and password
+//	@Tags			authentication
+//	@Accept			json
+//	@Produce		json
+//	@Param			request	body		dto.LoginRequestDoc	true	"Login credentials"
+//	@Success		200		{object}	dto.LoginResponse
+//	@Failure		400		{object}	ErrorResponse
+//	@Failure		401		{object}	ErrorResponse
+//	@Failure		500		{object}	ErrorResponse
+//	@Router			/auth/login [post]
 func (a *AuthHandler) Login(c echo.Context) error {
 	ctx := c.Request().Context()
 
@@ -71,6 +72,19 @@ func (a *AuthHandler) Login(c echo.Context) error {
 	})
 }
 
+// VerifyAuthToken
+//
+//	@Summary					User login
+//	@Description				Authenticate a user with their email and password
+//	@securityDefinitions.basic	BasicAuth
+//	@Tags						authentication
+//	@Accept						json
+//	@Produce					json
+//	@Success					200	{object}	dto.LoginResponse
+//	@Failure					400	{object}	ErrorResponse
+//	@Failure					401	{object}	ErrorResponse
+//	@Failure					500	{object}	ErrorResponse
+//	@Router						/auth/verify [post]
 func (a *AuthHandler) VerifyAuthToken(c echo.Context) error {
 	token, err := auth.JWTFromHeader(c.Request())
 	if err != nil {
@@ -92,6 +106,19 @@ func (a *AuthHandler) VerifyAuthToken(c echo.Context) error {
 	})
 }
 
+// RefreshAuthToken
+//
+//	@Summary					User login
+//	@Description				Authenticate a user with their email and password
+//	@securityDefinitions.basic	BasicAuth
+//	@Tags						authentication
+//	@Accept						json
+//	@Produce					json
+//	@Success					200	{object}	dto.LoginResponse
+//	@Failure					400	{object}	ErrorResponse
+//	@Failure					401	{object}	ErrorResponse
+//	@Failure					500	{object}	ErrorResponse
+//	@Router						/auth/refresh [post]
 func (a *AuthHandler) RefreshAuthToken(c echo.Context) error {
 	cookie, err := c.Cookie("refresh_token")
 	if err != nil {
