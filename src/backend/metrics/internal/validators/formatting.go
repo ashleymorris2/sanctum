@@ -14,7 +14,7 @@ func FormatErrors(err error) map[string]string {
 	var ve validator.ValidationErrors
 	if errors.As(err, &ve) {
 		for _, fe := range ve {
-			field := strings.ToLower(fe.Field()) // or use JSON tag if needed
+			field := strings.ToLower(fe.Field())
 			errs[field] = friendlyMessage(fe)
 		}
 	}

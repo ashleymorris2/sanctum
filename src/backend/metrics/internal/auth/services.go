@@ -40,8 +40,8 @@ func (s *credentialService) Register(ctx context.Context, credentials EmailPassw
 	}, nil
 }
 
-func (s *credentialService) Login(ctx context.Context, creds EmailPasswordCredentials) (*SessionResult, error) {
-	authResult, err := s.provider.authenticateWithCredentials(ctx, creds)
+func (s *credentialService) Login(ctx context.Context, credentials EmailPasswordCredentials) (*SessionResult, error) {
+	authResult, err := s.provider.authenticateWithCredentials(ctx, credentials)
 	if err != nil {
 		return nil, err
 	}

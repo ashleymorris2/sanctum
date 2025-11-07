@@ -9,7 +9,7 @@ import (
 	"metrics/internal/db/repositories"
 	"metrics/internal/db/sqlc"
 	"metrics/internal/middleware"
-	"metrics/internal/server/routes"
+	routes2 "metrics/internal/routes"
 	"metrics/internal/validators"
 	"os"
 	"time"
@@ -35,17 +35,18 @@ func New() *Server {
 
 	e := echo.New()
 	e.Validator = validators.NewRequestValidator()
+	e.HTTPErrorHandler = middleware.JSONErrorHandler(e.DefaultHTTPErrorHandler)
 
 	if showSwagger {
 		e.GET("/swagger/*", echoSwagger.WrapHandler)
 	}
 
 	public := e.Group("/api")
-	routes.RegisterAuthFor(public, authService)
+	routes2.RegisterAuthFor(public, authService)
 
 	private := e.Group("/api")
 	private.Use(middleware.AuthMiddleware(auth.NewMiddlewareConfig(authService)))
-	routes.RegisterMetricsFor(private)
+	routes2.RegisterMetricsFor(private)
 
 	return &Server{
 		Echo: e,

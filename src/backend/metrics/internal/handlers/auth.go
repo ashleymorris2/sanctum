@@ -1,12 +1,13 @@
-package handler
+package handlers
 
 import (
-	"errors"
+	"context"
 	"metrics/internal/auth"
+	"strings"
+	"time"
 
 	"metrics/internal/dto"
 	"metrics/internal/model"
-	"metrics/internal/validators"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -31,21 +32,25 @@ func NewAuthHandler(authProvider auth.CredentialService) *AuthHandler {
 //	@Produce		json
 //	@Param			request	body		dto.LoginRequestDoc	true	"Login credentials"
 //	@Success		200		{object}	dto.LoginResponse
-//	@Failure		400		{object}	ErrorResponse
-//	@Failure		401		{object}	ErrorResponse
-//	@Failure		500		{object}	ErrorResponse
+//	@Failure		400		{object}	dto.ErrorResponseDetails	"Bad request"
+//	@Failure		401		{object}	dto.ErrorResponseDetails	"Unauthorized"
+//	@Failure		500		{object}	dto.ErrorResponseDetails	"Internal error"
 //	@Router			/auth/login [post]
 func (a *AuthHandler) Login(c echo.Context) error {
-	ctx := c.Request().Context()
-
 	var req dto.LoginRequest
 	if err := c.Bind(&req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, ErrorResponse{Message: "Invalid request"})
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid request body")
 	}
 
+	req.Email = strings.ToLower(strings.TrimSpace(req.Email))
+	req.Password = strings.TrimSpace(req.Password)
+
 	if err := c.Validate(&req); err != nil {
-		return c.JSON(http.StatusBadRequest, validators.FormatErrors(err))
+		return err
 	}
+
+	ctx, cancel := context.WithTimeout(c.Request().Context(), 3*time.Second)
+	defer cancel()
 
 	authResult, err := a.authProvider.Login(ctx, auth.EmailPasswordCredentials{
 		Email:    req.Email,
@@ -53,15 +58,7 @@ func (a *AuthHandler) Login(c echo.Context) error {
 	})
 
 	if err != nil {
-		if errors.Is(err, auth.ErrInvalidCredentials) {
-			return echo.NewHTTPError(http.StatusUnauthorized, ErrorResponse{
-				Message: "Invalid credentials",
-			})
-		} else {
-			return echo.NewHTTPError(http.StatusInternalServerError, ErrorResponse{
-				Message: "Internal server error",
-			})
-		}
+		return err
 	}
 
 	return c.JSON(http.StatusOK, dto.LoginResponse{
@@ -81,9 +78,9 @@ func (a *AuthHandler) Login(c echo.Context) error {
 //	@Accept						json
 //	@Produce					json
 //	@Success					200	{object}	dto.LoginResponse
-//	@Failure					400	{object}	ErrorResponse
-//	@Failure					401	{object}	ErrorResponse
-//	@Failure					500	{object}	ErrorResponse
+//	@Failure					400	{object}	dto.ErrorResponseDetails
+//	@Failure					401	{object}	dto.ErrorResponseDetails
+//	@Failure					500	{object}	dto.ErrorResponseDetails
 //	@Router						/auth/verify [post]
 func (a *AuthHandler) VerifyAuthToken(c echo.Context) error {
 	token, err := auth.JWTFromHeader(c.Request())
@@ -115,9 +112,9 @@ func (a *AuthHandler) VerifyAuthToken(c echo.Context) error {
 //	@Accept						json
 //	@Produce					json
 //	@Success					200	{object}	dto.LoginResponse
-//	@Failure					400	{object}	ErrorResponse
-//	@Failure					401	{object}	ErrorResponse
-//	@Failure					500	{object}	ErrorResponse
+//	@Failure					400	{object}	dto.ErrorResponseDetails
+//	@Failure					401	{object}	dto.ErrorResponseDetails
+//	@Failure					500	{object}	dto.ErrorResponseDetails
 //	@Router						/auth/refresh [post]
 func (a *AuthHandler) RefreshAuthToken(c echo.Context) error {
 	cookie, err := c.Cookie("refresh_token")

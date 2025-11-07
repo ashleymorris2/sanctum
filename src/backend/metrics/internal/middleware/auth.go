@@ -21,7 +21,7 @@ func AuthMiddleware(config auth.MiddlewareConfig) echo.MiddlewareFunc {
 			}
 
 			if userID, ok := validateAccessToken(jwtToken, config); ok {
-				// Set userID in context for use in handler
+				// Set userID in context for use in handlers
 				c.Set("userID", userID)
 				return next(c)
 			}

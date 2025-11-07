@@ -2,13 +2,13 @@ package routes
 
 import (
 	"metrics/internal/auth"
-	"metrics/internal/handler"
+	"metrics/internal/handlers"
 
 	"github.com/labstack/echo/v4"
 )
 
 func RegisterAuthFor(g *echo.Group, provider auth.CredentialService) {
-	h := handler.NewAuthHandler(provider)
+	h := handlers.NewAuthHandler(provider)
 
 	authGroup := g.Group("/auth")
 
