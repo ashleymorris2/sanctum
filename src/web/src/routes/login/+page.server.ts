@@ -9,13 +9,13 @@ export const actions: Actions = {
 		const email = formData.get('email')?.toString().trim();
 		const password = formData.get('password')?.toString();
 
-		if (!email && !password) {
+		if (!email || (email?.trim() === '' && !password) || password?.trim() === '') {
 			return fail(400, { error: 'An Email and Password are required' });
 		}
-		if (!email) {
+		if (!email || email?.trim() === '') {
 			return fail(400, { email: 'An email is required' });
 		}
-		if (!password) {
+		if (!password || password?.trim() === '') {
 			return fail(400, { password: 'A password is required' });
 		}
 

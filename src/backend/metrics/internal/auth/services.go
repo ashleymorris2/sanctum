@@ -7,9 +7,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// CredentialService handles user authentication and registration using basic email-password credentials.
-// It hashes passwords using bcrypt, interacts with the database to persist user records, and generates JWT tokens
-// for session management. It relies on sqlc.Queries for database operations and supports configurable JWT timeouts.
+// credentialService handles user authentication and registration using basic email-password credentials.
 type credentialService struct {
 	provider     credentialAuthProvider
 	tokenService *tokenService

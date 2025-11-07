@@ -103,7 +103,7 @@ func (a *AuthHandler) VerifyAuthToken(c echo.Context) error {
 	})
 }
 
-// RefreshAuthToken
+// RefreshAccessToken
 //
 //	@Summary					User login
 //	@Description				Authenticate a user with their email and password
@@ -116,7 +116,7 @@ func (a *AuthHandler) VerifyAuthToken(c echo.Context) error {
 //	@Failure					401	{object}	dto.ErrorResponseDetails
 //	@Failure					500	{object}	dto.ErrorResponseDetails
 //	@Router						/auth/refresh [post]
-func (a *AuthHandler) RefreshAuthToken(c echo.Context) error {
+func (a *AuthHandler) RefreshAccessToken(c echo.Context) error {
 	cookie, err := c.Cookie("refresh_token")
 	if err != nil {
 		return c.JSON(http.StatusUnauthorized, "Invalid refresh token")

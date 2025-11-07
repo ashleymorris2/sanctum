@@ -1,12 +1,12 @@
 import { redirect, type Handle } from '@sveltejs/kit';
 import { getRouteAccess } from '$lib/server/auth/routeAccess';
-import { verifyAuthToken, refreshAuthToken } from '$lib/server/auth/authTokens';
+import { verifyAccessToken, refreshAccessToken } from '$lib/server/auth/accessTokens';
 import { setAuthTokenCookie } from '$lib/server/auth/setCookie';
 
 async function getAuthenticatedUser(authToken: string | undefined) {
 	if (!authToken) return null;
 	try {
-		return await verifyAuthToken(authToken);
+		return await verifyAccessToken(authToken);
 	} catch {
 		return null;
 	}
@@ -16,7 +16,7 @@ async function tryRefreshUser(event: Parameters<Handle>[0]['event']) {
 	const refreshToken = event.cookies.get('refresh_token');
 	if (!refreshToken) return null;
 
-	const result = await refreshAuthToken(refreshToken);
+	const result = await refreshAccessToken(refreshToken);
 	if (!result?.userId || !result?.authToken) return null;
 
 	setAuthTokenCookie(event.cookies, result.authToken);
