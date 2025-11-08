@@ -1,10 +1,7 @@
 package auth
 
 import (
-	"metrics/internal/db/repositories"
 	"metrics/internal/db/sqlc"
-
-	"time"
 )
 
 // ByCredentials creates a new instance of CredentialService with the specified database
@@ -19,12 +16,7 @@ import (
 //	    queries,
 //	    []byte("jwt-secret"),
 //	)
-func ByCredentials(queries *sqlc.Queries, refreshTokenRepo repositories.RefreshTokenRepository, jwtSecret []byte) CredentialService {
-	authTokenTTL := 15 * time.Minute       // 15 min
-	refreshTokenTTL := 28 * 24 * time.Hour // 28 days
-
+func ByCredentials(queries *sqlc.Queries, tokenService *TokenService) CredentialService {
 	provider := newCredentialProvider(queries)
-	tokenService := newTokenService(jwtSecret, authTokenTTL, refreshTokenTTL, refreshTokenRepo)
-
 	return newCredentialService(provider, tokenService)
 }

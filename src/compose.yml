@@ -20,16 +20,14 @@ services:
     build: ./backend/metrics
     volumes:
       - ./backend/metrics:/app
+      - ./backend/metrics/secrets:/app/secrets
     ports:
       - "3000:3000"
       - "4200:4200"
     networks:
       - sanctum_internal
     env_file:
-      - ./backend/.env
-    environment:
-      JWT_RSA_PRIV_PATH: /run/secrets/jwt_private_key
-      JWT_KID: ${JWT_KID}
+      - ./backend/metrics/.env
 
   db:
     image: postgres:16
@@ -50,7 +48,3 @@ networks:
 
 volumes:
   postgres_data: {}
-
-secrets:
-  jwt_private_key:
-    file: ${JWT_RSA_PRIV_PATH}

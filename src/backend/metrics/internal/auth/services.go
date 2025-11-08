@@ -10,10 +10,10 @@ import (
 // credentialService handles user authentication and registration using basic email-password credentials.
 type credentialService struct {
 	provider     credentialAuthProvider
-	tokenService *tokenService
+	tokenService *TokenService
 }
 
-func newCredentialService(provider credentialAuthProvider, tokenService *tokenService) CredentialService {
+func newCredentialService(provider credentialAuthProvider, tokenService *TokenService) CredentialService {
 	return &credentialService{
 		provider:     provider,
 		tokenService: tokenService,

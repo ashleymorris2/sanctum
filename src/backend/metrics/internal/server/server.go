@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"crypto/rsa"
 	"database/sql"
 	"log"
 	"metrics/internal/auth"
@@ -55,10 +56,34 @@ func New() *Server {
 }
 
 func configureAuth(queries *sqlc.Queries) auth.CredentialService {
+	path := os.Getenv("JWT_RSA_PRIV_PATH")
+	kid := os.Getenv("JWT_KID")
+
+	// Load the active keypair
+	keyPair, err := auth.LoadKeyPairFromPEM(path, kid)
+	if err != nil {
+		log.Fatalf("failed to load keypair: %v", err)
+	}
+
+	jwtTTL := 15 * time.Minute        // 15 min
+	refreshTTL := 28 * 24 * time.Hour // 28 days
+
+	// Build verify set - acceptable public keys
+	verify := map[string]*rsa.PublicKey{
+		keyPair.KID: keyPair.Public,
+	}
+
+	tokenService := auth.NewTokenService(
+		keyPair,
+		verify,
+		jwtTTL,
+		refreshTTL,
+		*repositories.NewRefreshTokenRepository(queries),
+	)
+
 	return auth.ByCredentials(
 		queries,
-		*repositories.NewRefreshTokenRepository(queries),
-		[]byte(os.Getenv("JWT_SECRET")))
+		tokenService)
 }
 
 func dbConnect() *sql.DB {

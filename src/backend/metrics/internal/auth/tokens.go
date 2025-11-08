@@ -19,7 +19,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type tokenService struct {
+type TokenService struct {
 	// Token Time To Live (TTL) values
 	jwtTTL     time.Duration
 	refreshTTL time.Duration
@@ -36,13 +36,13 @@ type tokenService struct {
 }
 
 // NewTokenService creates a new token service instance
-func newTokenServiceRS256(
+func NewTokenService(
 	active *KeyPair,
 	verifyKeys map[string]*rsa.PublicKey, // include active.KID and any old keys
 	jwtTTL, refreshTTL time.Duration,
 	refreshTokenRepo repositories.RefreshTokenRepository,
-) *tokenService {
-	s := &tokenService{
+) *TokenService {
+	s := &TokenService{
 		jwtTTL:           jwtTTL,
 		refreshTTL:       refreshTTL,
 		refreshTokenRepo: refreshTokenRepo,
@@ -58,7 +58,7 @@ func newTokenServiceRS256(
 }
 
 // generateJWT creates a new JWT token for the given user ID
-func (m *tokenService) generateJWT(userID uuid.UUID) (model.JWTToken, error) {
+func (m *TokenService) generateJWT(userID uuid.UUID) (model.JWTToken, error) {
 	if userID == uuid.Nil {
 		return "", ErrInvalidUserID
 	}
@@ -89,7 +89,7 @@ func (m *tokenService) generateJWT(userID uuid.UUID) (model.JWTToken, error) {
 }
 
 // validateJWT parses and validates a JWT token, returning its claims
-func (m *tokenService) validateJWT(jwtToken model.JWTToken) (jwt.MapClaims, error) {
+func (m *TokenService) validateJWT(jwtToken model.JWTToken) (jwt.MapClaims, error) {
 
 	// Parse the token
 	token, err := jwt.Parse(jwtToken.String(), func(t *jwt.Token) (any, error) {
@@ -127,7 +127,7 @@ func (m *tokenService) validateJWT(jwtToken model.JWTToken) (jwt.MapClaims, erro
 }
 
 // generateRefreshToken creates a new cryptographically secure refresh token
-func (m *tokenService) generateRefreshToken() (model.RefreshToken, error) {
+func (m *TokenService) generateRefreshToken() (model.RefreshToken, error) {
 	b := make([]byte, 32)
 	_, err := rand.Read(b)
 	if err != nil {
@@ -138,11 +138,11 @@ func (m *tokenService) generateRefreshToken() (model.RefreshToken, error) {
 }
 
 // storeRefreshToken persists a refresh token for a user
-func (m *tokenService) storeRefreshToken(ctx context.Context, token model.RefreshToken, userID uuid.UUID) error {
+func (m *TokenService) storeRefreshToken(ctx context.Context, token model.RefreshToken, userID uuid.UUID) error {
 	return m.refreshTokenRepo.InsertRefreshToken(ctx, token, userID, m.refreshTTL)
 }
 
-func (m *tokenService) validateRefreshToken(ctx context.Context, refreshToken model.RefreshToken) (*refreshTokenInfo, error) {
+func (m *TokenService) validateRefreshToken(ctx context.Context, refreshToken model.RefreshToken) (*refreshTokenInfo, error) {
 	// Retrieve the refresh token
 	storedToken, err := m.refreshTokenRepo.GetRefreshToken(ctx, refreshToken)
 	if err != nil {
@@ -170,7 +170,7 @@ func (m *tokenService) validateRefreshToken(ctx context.Context, refreshToken mo
 }
 
 // generateTokenPair creates both a JWT and refresh token for a user
-func (m *tokenService) generateTokenPair(ctx context.Context, userID uuid.UUID) (*TokenPair, error) {
+func (m *TokenService) generateTokenPair(ctx context.Context, userID uuid.UUID) (*TokenPair, error) {
 	// Generate JWT
 	jwtToken, err := m.generateJWT(userID)
 	if err != nil {
@@ -197,7 +197,7 @@ func (m *tokenService) generateTokenPair(ctx context.Context, userID uuid.UUID) 
 }
 
 // renewTokenPair validates a refresh token and generates a new JWT if valid
-func (m *tokenService) renewTokenPair(ctx context.Context, refreshToken model.RefreshToken) (*TokenPair, error) {
+func (m *TokenService) renewTokenPair(ctx context.Context, refreshToken model.RefreshToken) (*TokenPair, error) {
 	// Validate refresh token
 	info, err := m.validateRefreshToken(ctx, refreshToken)
 	if err != nil {
@@ -219,7 +219,7 @@ func (m *tokenService) renewTokenPair(ctx context.Context, refreshToken model.Re
 }
 
 // revokeRefreshToken marks a refresh token as invalid
-func (m *tokenService) revokeRefreshToken(ctx context.Context, refreshToken model.RefreshToken) error {
+func (m *TokenService) revokeRefreshToken(ctx context.Context, refreshToken model.RefreshToken) error {
 	return m.refreshTokenRepo.RevokeRefreshToken(ctx, refreshToken)
 }
 

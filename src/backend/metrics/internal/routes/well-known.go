@@ -16,5 +16,5 @@ func RegisterWellKnownRoutes(e *echo.Echo) {
 		log.Fatal(err)
 	}
 
-	g.GET("/jwks.json", auth.JWKSHandler())
+	g.GET("/jwks.json", auth.JWKSHandler(keys.Public, keys.KID))
 }
