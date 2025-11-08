@@ -3,10 +3,10 @@ import { getRouteAccess } from '$lib/server/auth/routeAccess';
 import { verifyAccessToken, refreshAccessToken } from '$lib/server/auth/accessTokens';
 import { setAuthTokenCookie } from '$lib/server/auth/setCookie';
 
-async function getAuthenticatedUser(authToken: string | undefined) {
-	if (!authToken) return null;
+async function getAuthenticatedUser(accessToken: string | undefined) {
+	if (!accessToken) return null;
 	try {
-		return await verifyAccessToken(authToken);
+		return await verifyAccessToken(accessToken);
 	} catch {
 		return null;
 	}
@@ -29,8 +29,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 	const routeAccess = getRouteAccess(route.id ?? undefined);
 
 	if (routeAccess.requiresAuth) {
-		const authToken = event.cookies.get('auth_token');
-		let user = await getAuthenticatedUser(authToken);
+		const accessToken = event.cookies.get('auth_token');
+		let user = await getAuthenticatedUser(accessToken);
 
 		if (!user) {
 			user = await tryRefreshUser(event);

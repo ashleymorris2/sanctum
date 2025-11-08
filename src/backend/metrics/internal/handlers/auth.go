@@ -69,7 +69,7 @@ func (a *AuthHandler) Login(c echo.Context) error {
 	})
 }
 
-// VerifyAuthToken
+// VerifyAccessToken
 //
 //	@Summary					User login
 //	@Description				Authenticate a user with their email and password
@@ -82,7 +82,7 @@ func (a *AuthHandler) Login(c echo.Context) error {
 //	@Failure					401	{object}	dto.ErrorResponseDetails
 //	@Failure					500	{object}	dto.ErrorResponseDetails
 //	@Router						/auth/verify [post]
-func (a *AuthHandler) VerifyAuthToken(c echo.Context) error {
+func (a *AuthHandler) VerifyAccessToken(c echo.Context) error {
 	token, err := auth.JWTFromHeader(c.Request())
 	if err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, "Missing or invalid token")

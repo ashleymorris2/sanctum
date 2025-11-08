@@ -57,3 +57,57 @@ tasks:
         -o ./docs
         --parseInternal
         --parseDependency
+
+  generate:rsa:key-pair:
+    desc: Generate an RSA private + public key pair
+    dir: .
+    vars:
+      # Allow passing a name (defaults to current date)
+      NAME: '{{default (now | date "2006-01-02") .NAME}}'
+    cmds:
+      - |
+        mkdir -p secrets
+        echo "Generating RSA key pair: jwt_rsa_private_{{.NAME}}.pem / jwt_rsa_public_{{.NAME}}.pem"
+        openssl genrsa -out "secrets/jwt_rsa_private_{{.NAME}}.pem" 2048
+        openssl rsa -in "secrets/jwt_rsa_private_{{.NAME}}.pem" -pubout -out "secrets/jwt_rsa_public_{{.NAME}}.pem"
+        chmod 600 secrets/jwt_rsa_private_{{.NAME}}.pem
+        echo "Done. KID = {{.NAME}}"
+
+  update:env:jwt-keys:
+    desc: Generate a new RSA key pair and update .env with paths and KID
+    deps: [ generate:rsa:key-pair ]
+    vars:
+      # Allow passing a name (defaults to current date)
+      NAME: '{{default (now | date "2006-01-02") .NAME}}'
+      silent: true
+    cmds:
+      - |
+        echo "Updating .env with key paths for {{.NAME}}"
+
+        # Replace or add JWT_RSA_PRIV_PATH
+        if grep -q "^JWT_RSA_PRIV_PATH=" .env; then
+          sed -i '' "s|^JWT_RSA_PRIV_PATH=.*|JWT_RSA_PRIV_PATH=./secrets/jwt_rsa_private_{{.NAME}}.pem|" .env
+        else
+          echo "JWT_RSA_PRIV_PATH=./secrets/jwt_rsa_private_{{.NAME}}.pem" >> .env
+        fi
+
+        # Replace or add JWT_RSA_PUB_PATH
+        if grep -q "^JWT_RSA_PUB_PATH=" .env; then
+          sed -i '' "s|^JWT_RSA_PUB_PATH=.*|JWT_RSA_PUB_PATH=./secrets/jwt_rsa_public_{{.NAME}}.pem|" .env
+        else
+          echo "JWT_RSA_PUB_PATH=./secrets/jwt_rsa_public_{{.NAME}}.pem" >> .env
+        fi
+
+        # Replace or add JWT_KID
+        if grep -q "^JWT_KID=" .env; then
+          sed -i '' "s|^JWT_KID=.*|JWT_KID={{.NAME}}|" .env
+        else
+          echo "JWT_KID={{.NAME}}" >> .env
+        fi
+
+        echo ".env updated"
+        echo ""
+        echo "New entries:"
+        echo "JWT_RSA_PRIV_PATH=./secrets/jwt_rsa_private_{{.NAME}}.pem"
+        echo "JWT_RSA_PUB_PATH=./secrets/jwt_rsa_public_{{.NAME}}.pem"
+        echo "JWT_KID={{.NAME}}"

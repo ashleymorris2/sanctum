@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"crypto/rand"
+	"crypto/rsa"
 	"crypto/subtle"
 	"encoding/base64"
 	"errors"
@@ -10,6 +11,8 @@ import (
 	"metrics/internal/model"
 	"net/http"
 	"strings"
+	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -17,25 +20,41 @@ import (
 )
 
 type tokenService struct {
-	jwtSecret        []byte
-	jwtTTL           time.Duration
-	refreshTTL       time.Duration
+	// Token Time To Live (TTL) values
+	jwtTTL     time.Duration
+	refreshTTL time.Duration
+
+	// Refresh token storage repository
 	refreshTokenRepo repositories.RefreshTokenRepository
+
+	// Active signing key (private) - swapped atomically on rotation
+	activeKey atomic.Pointer[KeyPair]
+
+	// All public keys we will accept by KID (for rotation overlap)
+	mu         sync.RWMutex
+	verifyKeys map[string]*rsa.PublicKey
 }
 
 // NewTokenService creates a new token service instance
-func newTokenService(
-	jwtSecret []byte,
-	jwtTTL time.Duration,
-	refreshTTL time.Duration,
+func newTokenServiceRS256(
+	active *KeyPair,
+	verifyKeys map[string]*rsa.PublicKey, // include active.KID and any old keys
+	jwtTTL, refreshTTL time.Duration,
 	refreshTokenRepo repositories.RefreshTokenRepository,
 ) *tokenService {
-	return &tokenService{
-		jwtSecret:        jwtSecret,
+	s := &tokenService{
 		jwtTTL:           jwtTTL,
 		refreshTTL:       refreshTTL,
 		refreshTokenRepo: refreshTokenRepo,
+		verifyKeys:       make(map[string]*rsa.PublicKey, len(verifyKeys)+1),
 	}
+	s.activeKey.Store(active)
+	for kid, pub := range verifyKeys {
+		s.verifyKeys[kid] = pub
+	}
+	// Ensure active key is present in verify set too
+	s.verifyKeys[active.KID] = active.Public
+	return s
 }
 
 // generateJWT creates a new JWT token for the given user ID
@@ -53,8 +72,15 @@ func (m *tokenService) generateJWT(userID uuid.UUID) (model.JWTToken, error) {
 		"jti": now.String(),             //JWT ID: an identifier for the JWT, which can be used to prevent the JWT from being replayed.
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	jwtToken, err := token.SignedString(m.jwtSecret)
+	active := m.activeKey.Load()
+	if active == nil || active.Private == nil {
+		return "", ErrJWTGeneration
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+	token.Header["kid"] = active.KID
+
+	jwtToken, err := token.SignedString(active.Private)
 	if err != nil {
 		return "", ErrJWTGeneration
 	}
@@ -64,13 +90,25 @@ func (m *tokenService) generateJWT(userID uuid.UUID) (model.JWTToken, error) {
 
 // validateJWT parses and validates a JWT token, returning its claims
 func (m *tokenService) validateJWT(jwtToken model.JWTToken) (jwt.MapClaims, error) {
+
 	// Parse the token
-	token, err := jwt.Parse(jwtToken.String(), func(token *jwt.Token) (interface{}, error) {
-		// Validate the signing method
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+	token, err := jwt.Parse(jwtToken.String(), func(t *jwt.Token) (any, error) {
+		if t.Method != jwt.SigningMethodRS256 {
 			return nil, ErrInvalidJWTToken
 		}
-		return m.jwtSecret, nil
+		kid, _ := t.Header["kid"].(string)
+		m.mu.RLock()
+		pub := m.verifyKeys[kid]
+		m.mu.RUnlock()
+		if pub == nil {
+			// If kid missing/unknown, fall back to active pub
+			active := m.activeKey.Load()
+			if active == nil || active.Public == nil {
+				return nil, ErrInvalidJWTToken
+			}
+			pub = active.Public
+		}
+		return pub, nil
 	})
 
 	if err != nil {

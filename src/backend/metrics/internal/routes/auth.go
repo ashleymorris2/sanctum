@@ -13,6 +13,6 @@ func RegisterAuthFor(g *echo.Group, provider auth.CredentialService) {
 	authGroup := g.Group("/auth")
 
 	authGroup.POST("/login", h.Login)
-	authGroup.POST("/verify", h.VerifyAuthToken)
+	authGroup.POST("/verify", h.VerifyAccessToken)
 	authGroup.POST("/refresh", h.RefreshAccessToken)
 }
