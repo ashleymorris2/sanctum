@@ -32,9 +32,9 @@ func NewAuthHandler(authProvider auth.CredentialService) *AuthHandler {
 //	@Produce		json
 //	@Param			request	body		dto.LoginRequestDoc	true	"Login credentials"
 //	@Success		200		{object}	dto.LoginResponse
-//	@Failure		400		{object}	dto.ErrorResponseDetails	"Bad request"
-//	@Failure		401		{object}	dto.ErrorResponseDetails	"Unauthorized"
-//	@Failure		500		{object}	dto.ErrorResponseDetails	"Internal error"
+//	@Failure		400		{object}	dto.ErrorResponse	"Bad request"
+//	@Failure		401		{object}	dto.ErrorResponse	"Unauthorized"
+//	@Failure		500		{object}	dto.ErrorResponse	"Internal error"
 //	@Router			/auth/login [post]
 func (a *AuthHandler) Login(c echo.Context) error {
 	var req dto.LoginRequest
@@ -78,9 +78,9 @@ func (a *AuthHandler) Login(c echo.Context) error {
 //	@Accept						json
 //	@Produce					json
 //	@Success					200	{object}	dto.LoginResponse
-//	@Failure					400	{object}	dto.ErrorResponseDetails
-//	@Failure					401	{object}	dto.ErrorResponseDetails
-//	@Failure					500	{object}	dto.ErrorResponseDetails
+//	@Failure					400	{object}	dto.ErrorResponse
+//	@Failure					401	{object}	dto.ErrorResponse
+//	@Failure					500	{object}	dto.ErrorResponse
 //	@Router						/auth/verify [post]
 func (a *AuthHandler) VerifyAccessToken(c echo.Context) error {
 	token, err := auth.JWTFromHeader(c.Request())
@@ -112,9 +112,9 @@ func (a *AuthHandler) VerifyAccessToken(c echo.Context) error {
 //	@Accept						json
 //	@Produce					json
 //	@Success					200	{object}	dto.LoginResponse
-//	@Failure					400	{object}	dto.ErrorResponseDetails
-//	@Failure					401	{object}	dto.ErrorResponseDetails
-//	@Failure					500	{object}	dto.ErrorResponseDetails
+//	@Failure					400	{object}	dto.ErrorResponse
+//	@Failure					401	{object}	dto.ErrorResponse
+//	@Failure					500	{object}	dto.ErrorResponse
 //	@Router						/auth/refresh [post]
 func (a *AuthHandler) RefreshAccessToken(c echo.Context) error {
 	cookie, err := c.Cookie("refresh_token")

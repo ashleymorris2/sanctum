@@ -10,14 +10,12 @@ import (
 	"metrics/internal/db/repositories"
 	"metrics/internal/db/sqlc"
 	"metrics/internal/middleware"
-	routes2 "metrics/internal/routes"
 	"metrics/internal/validators"
 	"os"
 	"time"
 
 	"github.com/labstack/echo/v4"
 	_ "github.com/lib/pq"
-	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
 // showSwagger is a flag to show swagger UI
@@ -38,16 +36,13 @@ func New() *Server {
 	e.Validator = validators.NewRequestValidator()
 	e.HTTPErrorHandler = middleware.JSONErrorHandler(e.DefaultHTTPErrorHandler)
 
-	if showSwagger {
-		e.GET("/swagger/*", echoSwagger.WrapHandler)
-	}
+	api := e.Group("/api")
 
-	public := e.Group("/api")
-	routes2.RegisterAuthFor(public, authService)
+	registerSwagger(e)
+	registerWellKnown(e)
 
-	private := e.Group("/api")
-	private.Use(middleware.AuthMiddleware(auth.NewMiddlewareConfig(authService)))
-	routes2.RegisterMetricsFor(private)
+	registerPublicRoutes(api, authService)
+	registerRoutes(api, authService)
 
 	return &Server{
 		Echo: e,
@@ -83,7 +78,8 @@ func configureAuth(queries *sqlc.Queries) auth.CredentialService {
 
 	return auth.ByCredentials(
 		queries,
-		tokenService)
+		tokenService,
+	)
 }
 
 func dbConnect() *sql.DB {
