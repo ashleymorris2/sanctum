@@ -13,8 +13,7 @@ import (
 // @title			Metrics API
 // @version			1.0
 // @description		API for uploading of metric data
-// @tag.name		authentication
-// @tag.description	Bearer JWT (RS256). Public JWKS at /.well-known/jwks.json
+// @description		Bearer JWT (RS256). Public JWKS at /.well-known/jwks.json
 // @BasePath		/api
 func main() {
 	err := godotenv.Load()

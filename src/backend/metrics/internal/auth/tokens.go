@@ -66,6 +66,8 @@ func (m *TokenService) generateJWT(userID uuid.UUID) (model.JWTToken, error) {
 	now := time.Now()
 	claims := jwt.MapClaims{
 		"sub": userID.String(),          //Subject - who is the token for
+		"iss": "metrics-api",            // Issuer
+		"aud": []string{"metrics-web"},  // Audience
 		"exp": now.Add(m.jwtTTL).Unix(), // Expiration time (unix timestamp)
 		"iat": now.Unix(),               // Issued at: time when the token was generated (unix timestamp)
 		"nbf": now.Unix(),               //Not before: defines the time before which the JWT cannot be accepted for processing.

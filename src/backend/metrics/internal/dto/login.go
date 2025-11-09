@@ -12,7 +12,7 @@ type LoginRequestDoc struct {
 }
 
 type LoginResponse struct {
-	AuthToken       string  `json:"authToken"`
+	AccessToken     string  `json:"accessToken"`
 	UserId          string  `json:"userId"`
 	RefreshToken    string  `json:"refreshToken"`
 	RefreshTokenTTL float64 `json:"refreshTokenTTL"`

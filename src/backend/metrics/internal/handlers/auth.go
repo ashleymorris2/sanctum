@@ -62,7 +62,7 @@ func (a *AuthHandler) Login(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, dto.LoginResponse{
-		AuthToken:       authResult.TokenPair.AccessToken.String(),
+		AccessToken:     authResult.TokenPair.AccessToken.String(),
 		RefreshToken:    authResult.TokenPair.RefreshToken.String(),
 		RefreshTokenTTL: authResult.TokenPair.RefreshTokenTTL.Seconds(),
 		UserId:          authResult.UserID,

@@ -4,8 +4,8 @@
 	"version": "0.0.1",
 	"type": "module",
 	"scripts": {
-        "dev": "vite dev",
-        "debug": "NODE_OPTIONS='--inspect=0.0.0.0:9229' vite dev --host",
+		"dev": "vite dev",
+		"debug": "NODE_OPTIONS='--inspect=0.0.0.0:9229' vite dev --host",
 		"build": "vite build",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
@@ -62,6 +62,7 @@
 		]
 	},
 	"dependencies": {
-		"@lucide/svelte": "^0.539.0"
+		"@lucide/svelte": "^0.539.0",
+		"jose": "^6.1.0"
 	}
 }

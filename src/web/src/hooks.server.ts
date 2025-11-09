@@ -1,35 +1,39 @@
 import { redirect, type Handle } from '@sveltejs/kit';
 import { getRouteAccess } from '$lib/server/auth/routeAccess';
-import { verifyAccessToken, refreshAccessToken } from '$lib/server/auth/accessTokens';
-import { setAuthTokenCookie } from '$lib/server/auth/setCookie';
+import { refreshAccessToken, verifyAccessTokenLocal } from '$lib/server/auth/accessTokens';
+import { setAccessTokenCookie as setAccessTokenCookie } from '$lib/server/auth/setCookie';
+import type { User } from '$lib/types/user';
 
-async function getAuthenticatedUser(accessToken: string | undefined) {
+async function getAuthenticatedUser(accessToken: string | undefined): Promise<User | null> {
 	if (!accessToken) return null;
-	try {
-		return await verifyAccessToken(accessToken);
-	} catch {
-		return null;
-	}
+	const claims = await verifyAccessTokenLocal(accessToken); // returns claims | null
+	if (!claims) return null;
+
+	return {
+		id: claims.sub as string
+	};
 }
 
-async function tryRefreshUser(event: Parameters<Handle>[0]['event']) {
+async function tryRefreshUser(event: Parameters<Handle>[0]['event']): Promise<User | null> {
 	const refreshToken = event.cookies.get('refresh_token');
 	if (!refreshToken) return null;
 
-	const result = await refreshAccessToken(refreshToken);
-	if (!result?.userId || !result?.authToken) return null;
+	const accessToken = await refreshAccessToken(refreshToken);
+	if (!accessToken) return null;
 
-	setAuthTokenCookie(event.cookies, result.authToken);
+	const claims = await verifyAccessTokenLocal(accessToken);
+	if (!claims) return null;
 
-	return result.userId;
+	setAccessTokenCookie(event.cookies, accessToken);
+
+	return { id: claims.sub as string };
 }
 
 export const handle: Handle = async ({ event, resolve }) => {
-	const { route } = event;
-	const routeAccess = getRouteAccess(route.id ?? undefined);
+	const routeAccess = getRouteAccess(event.route.id ?? undefined);
 
 	if (routeAccess.requiresAuth) {
-		const accessToken = event.cookies.get('auth_token');
+		const accessToken = event.cookies.get('access_token');
 		let user = await getAuthenticatedUser(accessToken);
 
 		if (!user) {

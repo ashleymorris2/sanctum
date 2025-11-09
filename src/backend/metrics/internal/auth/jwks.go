@@ -54,6 +54,7 @@ type jwks struct {
 func rsaToJWK(pub *rsa.PublicKey, kid string) jwkKey {
 	n := base64.RawURLEncoding.EncodeToString(pub.N.Bytes())
 	e := base64.RawURLEncoding.EncodeToString(big.NewInt(int64(pub.E)).Bytes())
+
 	return jwkKey{Kty: "RSA", Kid: kid, Use: "sig", Alg: "RS256", N: n, E: e}
 }
 

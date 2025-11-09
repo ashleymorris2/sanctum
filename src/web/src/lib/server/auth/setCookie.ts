@@ -1,7 +1,7 @@
 import type { Cookies } from '@sveltejs/kit';
 
-export function setAuthTokenCookie(cookies: Cookies, token: string) {
-	cookies.set('auth_token', token, {
+export function setAccessTokenCookie(cookies: Cookies, token: string) {
+	cookies.set('access_token', token, {
 		httpOnly: true,
 		secure: process.env.NODE_ENV === 'production',
 		sameSite: 'lax',
